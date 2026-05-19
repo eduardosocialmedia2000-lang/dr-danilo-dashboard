@@ -630,7 +630,7 @@ async function loadGeral() {
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
   const totalVendas = totais.reduce((s, r) => s + (+r.vendas_total||0), 0);
   const totalReceita = totais.reduce((s, r) => s + (+r.receita_total||0), 0);
-  const totalCliquesWA = kpis.filter(r=>r.categoria==='consultas').reduce((s,r)=>s+(+r.cliques_wa||0),0);
+  const totalCliquesWA = kpis.filter(r=>r.categoria!=='infoproduto').reduce((s,r)=>s+(+r.cliques_wa||0),0);
   const totalReceita_info = roas.reduce((s,r)=>s+(+r.receita_info||0),0);
   const totalReceita_cons = roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
   const totalRoas = totalSpend > 0 ? (totalReceita_info + totalReceita_cons) / totalSpend : 0;
@@ -780,11 +780,11 @@ async function loadConsultas() {
 
   const [ads, roas, kpis] = await Promise.all([
     sb('vw_performance_by_ad',
-      `select=ad_id,ad_name,campaign_name,spend,leads,link_clicks,cpc,effective_status,thumbnail_url,image_url&categoria=eq.consultas&date=gte.${from}&date=lte.${to}`),
+      `select=ad_id,ad_name,campaign_name,spend,leads,link_clicks,cpc,effective_status,thumbnail_url,image_url&campaign_name=not.ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`),
     sb('vw_roas_unificado',
       `select=ad_id,spend,leads_consulta,consultas_fechadas,receita_consultas&date=gte.${from}&date=lte.${to}`),
     sb('vw_kpis_overview',
-      `select=spend,cliques_wa&categoria=eq.consultas&date=gte.${from}&date=lte.${to}`)
+      `select=spend,cliques_wa&categoria=neq.infoproduto&date=gte.${from}&date=lte.${to}`)
   ]);
 
   const roasByAd = {};
@@ -982,7 +982,10 @@ async function loadStudio() {
   const { cat, days, sort, status } = state.studio;
   const { from } = dateRange(days);
   const today = new Date().toISOString().slice(0,10);
-  let params = `select=ad_id,ad_name,campaign_name,categoria,effective_status,spend,ctr,cpm,cpc,frequency,impressions,vendas_count,receita,link_clicks,thumbnail_url,image_url,ad_title,ad_body,call_to_action_type,purchase_meta,quality_ranking,engagement_rate_ranking,conversion_rate_ranking&categoria=eq.${cat}&date=gte.${from}&date=lte.${today}`;
+  const catFilter = cat === 'consultas'
+    ? 'campaign_name=not.ilike.%25INFO%25'
+    : `categoria=eq.${cat}`;
+  let params = `select=ad_id,ad_name,campaign_name,categoria,effective_status,spend,ctr,cpm,cpc,frequency,impressions,vendas_count,receita,link_clicks,thumbnail_url,image_url,ad_title,ad_body,call_to_action_type,purchase_meta,quality_ranking,engagement_rate_ranking,conversion_rate_ranking&${catFilter}&date=gte.${from}&date=lte.${today}`;
 
   const data = await sb('vw_performance_by_ad', params);
 
