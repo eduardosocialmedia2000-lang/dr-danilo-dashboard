@@ -9,7 +9,7 @@
 <style>
 :root{
   --bg:#f8f9fa;--card:#fff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;
-  --accent:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--purple:#7c3aed;
+  --accent:#2563eb;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--purple:#7c3aed;--yellow:#ca8a04;
   --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
   --radius:12px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
@@ -340,6 +340,9 @@ label.check input{accent-color:var(--accent)}
 
 <!-- ═══════════════ CONSULTAS ═══════════════ -->
 <div class="panel" id="panel-consultas">
+  <div id="utm-warning" style="background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.4);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--yellow,#ca8a04);display:none">
+    ⚠️ <b>UTM tracking não configurado:</b> os campos UTM dos leads no Kommo estão vazios — as colunas Leads, Fechados e ROAS Real não têm dados. Configure a captura de UTMs no formulário/Salesbot do Kommo para habilitar a atribuição.
+  </div>
   <div class="page-header">
     <div class="page-header-left">
       <h1>Consultas</h1>
@@ -543,21 +546,23 @@ const fmt = {
   date: d => { const dt = new Date(d); return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}); }
 };
 
-function dateRange(days) {
+// endToday=true → inclui hoje no topo da janela (ex: tabs de vendas em tempo real)
+// endToday=false (padrão) → termina ontem, alinhado ao Meta Ads Manager
+function dateRange(days, endToday) {
   const now = new Date();
   const today = new Date(now); today.setHours(0,0,0,0);
   let from, to;
   if (days === 0) {
-    // Hoje: from = today, to = today
     from = new Date(today);
     to   = new Date(today);
   } else if (days === 1) {
-    // Ontem: from = yesterday, to = yesterday
     from = new Date(today); from.setDate(from.getDate()-1);
     to   = new Date(from);
+  } else if (endToday) {
+    to   = new Date(today);
+    from = new Date(today); from.setDate(from.getDate()-days+1);
   } else {
-    // X dias: termina ontem (igual ao Meta Ads Manager "últimos X dias")
-    // to = yesterday, from = today - days (= yesterday - (days-1))
+    // Alinhado ao Meta Ads Manager: N dias completos terminando ontem
     to   = new Date(today); to.setDate(to.getDate()-1);
     from = new Date(today); from.setDate(from.getDate()-days);
   }
@@ -719,7 +724,7 @@ let infoAllRows = [];
 let infoCurFilter = 'all';
 
 async function loadInfo() {
-  const { from, to } = dateRange(state.info.days);
+  const { from, to } = dateRange(state.info.days, true);  // inclui hoje
   const data = await sb('vw_performance_by_ad_fix',
     `select=ad_id,ad_name,campaign_name,spend,vendas_count_fix,receita_fix,effective_status,thumbnail_url,image_url&campaign_name=ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`);
 
@@ -789,7 +794,7 @@ let consultasAllRows = [];
 let consultasCurFilter = 'all';
 
 async function loadConsultas() {
-  const { from, to } = dateRange(state.consultas.days);
+  const { from, to } = dateRange(state.consultas.days, true);  // inclui hoje
   const showPaused = document.getElementById('consultas-show-paused').checked;
 
   const [ads, roas, kpis] = await Promise.all([
@@ -828,6 +833,12 @@ async function loadConsultas() {
   document.getElementById('c-invest').textContent = fmt.brl(totalSpend);
   document.getElementById('c-cliqueswa').textContent = fmt.int(totalCliquesWA) || '—';
   document.getElementById('c-cpl').textContent = totalCliquesWA > 0 ? fmt.brl(cpl) : '—';
+
+  // Aviso de UTM se não houver nenhuma atribuição de leads
+  const totalLeadsKommo = Object.values(roasByAd).reduce((s,r)=>s+(r.leads||0),0);
+  const utmWarn = document.getElementById('utm-warning');
+  if (utmWarn) utmWarn.style.display = totalLeadsKommo === 0 ? '' : 'none';
+  window._roasByAd = roasByAd;
 
   renderConsultasTable(roasByAd);
   markSynced();
@@ -995,38 +1006,58 @@ function renderFunilChart(data) {
 // ─── STUDIO ──────────────────────────────────────────────────────────────────
 async function loadStudio() {
   const { cat, days, sort, status } = state.studio;
-  const { from } = dateRange(days);
-  const today = new Date().toISOString().slice(0,10);
+  const { from, to } = dateRange(days, true);  // inclui hoje
   const catFilter = cat === 'consultas'
     ? 'campaign_name=not.ilike.%25INFO%25'
     : `categoria=eq.${cat}`;
-  let params = `select=ad_id,ad_name,campaign_name,categoria,effective_status,spend,ctr,cpm,cpc,frequency,impressions,vendas_count,receita,link_clicks,thumbnail_url,image_url,ad_title,ad_body,call_to_action_type,purchase_meta,quality_ranking,engagement_rate_ranking,conversion_rate_ranking&${catFilter}&date=gte.${from}&date=lte.${today}`;
+  // Usa vw_performance_by_ad_fix para receita/vendas (atribuição por dia, não cumulativa)
+  // + vw_performance_by_ad para metadados (ad_title, ad_body, categoria, etc.)
+  const [metaData, fixData] = await Promise.all([
+    sb('vw_performance_by_ad', `select=ad_id,ad_name,campaign_name,categoria,effective_status,spend,ctr,cpm,cpc,frequency,impressions,link_clicks,thumbnail_url,image_url,ad_title,ad_body,call_to_action_type,purchase_meta,purchase_value_meta,quality_ranking,engagement_rate_ranking,conversion_rate_ranking&${catFilter}&date=gte.${from}&date=lte.${to}`),
+    cat === 'infoproduto'
+      ? sb('vw_performance_by_ad_fix', `select=ad_id,vendas_count_fix,receita_fix&campaign_name=ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`)
+      : Promise.resolve([])
+  ]);
 
-  const data = await sb('vw_performance_by_ad', params);
-
-  const byAd = {};
-  data.forEach(r => {
-    if (!byAd[r.ad_id]) byAd[r.ad_id] = {
-      ...r, spend:0, impressions:0, clicks:0, vendas:0, receita:0,
-      thruplays:0, ctr_sum:0, ctr_cnt:0
-    };
-    const a = byAd[r.ad_id];
-    a.spend      += +r.spend||0;
-    a.impressions += +r.impressions||0;
-    a.clicks     += +r.link_clicks||0;
-    a.vendas     += +r.vendas_count||0;
-    a.receita    += +r.receita||0;
-    a.ctr_sum    += +r.ctr||0;
-    a.ctr_cnt    += r.ctr!=null?1:0;
+  // Índice de receita correta por ad_id (fix view)
+  const fixByAd = {};
+  fixData.forEach(r => {
+    if (!fixByAd[r.ad_id]) fixByAd[r.ad_id] = { vendas:0, receita:0 };
+    fixByAd[r.ad_id].vendas  += +r.vendas_count_fix||0;
+    fixByAd[r.ad_id].receita += +r.receita_fix||0;
   });
 
-  let ads = Object.values(byAd).map(a => ({
-    ...a,
-    roas: a.spend>0 ? a.receita/a.spend : 0,
-    cpa:  a.vendas>0 ? a.spend/a.vendas : null,
-    avg_ctr: a.ctr_cnt>0 ? a.ctr_sum/a.ctr_cnt : 0,
-    score: (a.avg_ctr>0?a.avg_ctr*10:0) + (a.spend>0?Math.min(a.receita/a.spend,5):0)
-  }));
+  const byAd = {};
+  metaData.forEach(r => {
+    if (!byAd[r.ad_id]) byAd[r.ad_id] = {
+      ...r, spend:0, impressions:0, clicks:0,
+      purchase_meta_sum:0, purchase_value_sum:0,
+      ctr_sum:0, ctr_cnt:0
+    };
+    const a = byAd[r.ad_id];
+    a.spend               += +r.spend||0;
+    a.impressions         += +r.impressions||0;
+    a.clicks              += +r.link_clicks||0;
+    a.purchase_meta_sum   += +r.purchase_meta||0;
+    a.purchase_value_sum  += +r.purchase_value_meta||0;
+    a.ctr_sum             += +r.ctr||0;
+    a.ctr_cnt             += r.ctr!=null?1:0;
+  });
+
+  let ads = Object.values(byAd).map(a => {
+    // Para infoproduto: usa receita do _fix (atribuição por dia via Kiwify UTM)
+    // Para consultas: usa purchase_value_meta (pixel Meta, por dia)
+    const fix = fixByAd[a.ad_id]||null;
+    const receita = fix ? fix.receita : a.purchase_value_sum;
+    const vendas  = fix ? fix.vendas  : a.purchase_meta_sum;
+    const avg_ctr = a.ctr_cnt>0 ? a.ctr_sum/a.ctr_cnt : 0;
+    const roas    = a.spend>0 ? receita/a.spend : 0;
+    return { ...a, receita, vendas, avg_ctr,
+      roas,
+      cpa:  vendas>0 ? a.spend/vendas : null,
+      score: (avg_ctr>0?avg_ctr*10:0) + (a.spend>0?Math.min(roas,5):0)
+    };
+  });
 
   if (status === 'active') ads = ads.filter(a=>a.effective_status==='ACTIVE');
 
@@ -1178,9 +1209,9 @@ setInterval(updateSyncAge, 15000);
 function reloadActiveTab() {
   const activeTab = document.querySelector('.tab.active')?.dataset.tab;
   if (!activeTab || activeTab === 'geral') loadGeral();
-  if (activeTab === 'info') loadInfo();
-  if (activeTab === 'consultas') loadConsultas();
-  if (activeTab === 'studio') loadStudio();
+  else if (activeTab === 'info') loadInfo();
+  else if (activeTab === 'consultas') loadConsultas();
+  else if (activeTab === 'studio') loadStudio();
 }
 
 // Debounce: evita disparar reload 300x durante batch upsert do Apps Script
