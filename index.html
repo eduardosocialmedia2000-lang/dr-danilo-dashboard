@@ -186,6 +186,39 @@ td{padding:10px 12px;vertical-align:middle}
 .creative-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
 .btn-briefing{padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:.15s}
 .btn-briefing:hover{opacity:.9}
+/* BRIEFING MODAL */
+.briefing-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px}
+.briefing-modal{background:var(--card);border:1px solid var(--border);border-radius:12px;width:100%;max-width:620px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,.25)}
+.briefing-modal-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.briefing-modal-header h3{font-size:15px;font-weight:700;margin:0}
+.briefing-modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:2px 6px;border-radius:4px}
+.briefing-modal-close:hover{background:var(--border)}
+.briefing-modal-body{padding:20px;overflow-y:auto;flex:1}
+.briefing-section{margin-bottom:18px}
+.briefing-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+.briefing-section-content{font-size:13px;line-height:1.6;white-space:pre-wrap;background:var(--bg);border-radius:8px;padding:12px 14px;border:1px solid var(--border)}
+.briefing-variation{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+.briefing-variation-title{font-size:12px;font-weight:700;margin-bottom:4px}
+.briefing-variation-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.briefing-modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.btn-copy-briefing{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-copy-briefing:hover{opacity:.9}
+.btn-close-modal{padding:8px 18px;background:var(--border);color:var(--text);border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer}
+.btn-close-modal:hover{opacity:.8}
+
+/* WPP CANAL */
+.wpp-canal-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.wpp-canal-row:last-child{border-bottom:none}
+.wpp-canal-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.wpp-canal-label{font-size:13px;font-weight:600;flex:1}
+.wpp-canal-bar-outer{width:120px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;flex-shrink:0}
+.wpp-canal-bar-inner{height:100%;border-radius:3px;transition:width .5s}
+.wpp-canal-num{font-size:14px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+.wpp-canal-agend{font-size:11px;color:var(--muted);width:80px;text-align:right;flex-shrink:0}
+.wpp-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.wpp-kpi{background:var(--bg);border-radius:8px;padding:12px 14px}
+.wpp-kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.wpp-kpi-val{font-size:22px;font-weight:800;letter-spacing:-0.5px}
 
 /* LOADING / EMPTY */
 .loading{padding:40px;text-align:center;color:var(--muted)}
@@ -228,6 +261,7 @@ label.check input{accent-color:var(--accent)}
     <div class="tab" data-tab="consultas">Consultas</div>
     <div class="tab" data-tab="funil">Funil de Consultas</div>
     <div class="tab" data-tab="studio">🎬 Studio de Criativos</div>
+    <div class="tab" data-tab="organico">🌱 Orgânico</div>
   </div>
   <div class="nav-actions">
     <div class="badge-live"><div class="dot-live"></div><span id="sync-age">Tempo real</span></div>
@@ -249,6 +283,7 @@ label.check input{accent-color:var(--accent)}
     <button class="period-btn" data-days="1">Ontem</button>
     <button class="period-btn active" data-days="7">7 dias</button>
     <button class="period-btn" data-days="30">30 dias</button>
+    <button class="period-btn" data-days="-1">Este mês</button>
   </div>
   <div class="kpi-grid">
     <div class="kpi-card">
@@ -291,6 +326,7 @@ label.check input{accent-color:var(--accent)}
       <button class="period-btn" data-days="1">Ontem</button>
       <button class="period-btn active" data-days="7">7 dias</button>
       <button class="period-btn" data-days="30">30 dias</button>
+      <button class="period-btn" data-days="-1">Este mês</button>
     </div>
   </div>
   <div class="info-banner">ℹ️ Vendas anteriores à integração com o tracking não estão atribuídas aos anúncios. Vendas novas serão automaticamente linkadas pelo ad_id.</div>
@@ -353,6 +389,7 @@ label.check input{accent-color:var(--accent)}
       <button class="period-btn" data-days="1">Ontem</button>
       <button class="period-btn active" data-days="7">7 dias</button>
       <button class="period-btn" data-days="30">30 dias</button>
+      <button class="period-btn" data-days="-1">Este mês</button>
     </div>
   </div>
   <div class="kpi-grid">
@@ -479,6 +516,53 @@ label.check input{accent-color:var(--accent)}
       <tbody id="gargalos-tbody"></tbody>
     </table></div>
   </div>
+
+  <!-- ── LEADS POR CANAL ── -->
+  <div class="chart-card">
+    <div class="chart-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      <div>
+        <div class="chart-eyebrow">WHATSAPP — ATRIBUIÇÃO</div>
+        <div class="chart-title">Leads por Canal</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div class="badge-live"><div class="dot-live"></div><span id="wpp-sync-age">Ao vivo</span></div>
+        <div class="filter-group" id="wpp-period-btns">
+          <button class="filter-btn active" data-wpp-days="0">Hoje</button>
+          <button class="filter-btn" data-wpp-days="7">7d</button>
+          <button class="filter-btn" data-wpp-days="30">30d</button>
+          <button class="filter-btn" data-wpp-days="-1">Tudo</button>
+        </div>
+      </div>
+    </div>
+    <div id="wpp-leads-body">
+      <div class="loading"><div class="spinner"></div><div>Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- ── CONSULTAS POR MÊS ── -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-eyebrow">CONSULTAS AGENDADAS — ÚLTIMOS 6 MESES</div>
+      <div class="chart-title">Agendamentos por Canal e Mês</div>
+    </div>
+    <div class="chart-wrap" style="height:260px"><canvas id="chartConsultasMensal"></canvas></div>
+    <div id="consultas-mensal-val" style="margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ BRIEFING MODAL ═══════════════ -->
+<div class="briefing-overlay" id="briefing-overlay" style="display:none" onclick="if(event.target===this)closeBriefing()">
+  <div class="briefing-modal">
+    <div class="briefing-modal-header">
+      <h3 id="briefing-modal-title">📋 Briefing de Variação</h3>
+      <button class="briefing-modal-close" onclick="closeBriefing()">✕</button>
+    </div>
+    <div class="briefing-modal-body" id="briefing-modal-body"></div>
+    <div class="briefing-modal-footer">
+      <button class="btn-close-modal" onclick="closeBriefing()">Fechar</button>
+      <button class="btn-copy-briefing" id="btn-copy-briefing" onclick="copyBriefing()">📋 Copiar briefing</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════ STUDIO ═══════════════ -->
@@ -498,6 +582,7 @@ label.check input{accent-color:var(--accent)}
       <button class="filter-btn" onclick="setStudioPeriod(this,7)">7 dias</button>
       <button class="filter-btn active" onclick="setStudioPeriod(this,30)">30 dias</button>
       <button class="filter-btn" onclick="setStudioPeriod(this,90)">90 dias</button>
+      <button class="filter-btn" onclick="setStudioPeriod(this,-1)">Este mês</button>
     </div>
     <div class="filter-group">
       <button class="filter-btn active" onclick="setStudioSort(this,'score')">Performance Score</button>
@@ -514,21 +599,88 @@ label.check input{accent-color:var(--accent)}
   </div>
 </div>
 
+<!-- ═══════════════ ORGÂNICO ═══════════════ -->
+<div class="panel" id="panel-organico">
+  <div class="hero" style="padding:24px 0 16px">
+    <div class="hero-label">TRÁFEGO ORGÂNICO</div>
+    <div class="hero-value" id="org-total-clicks" style="font-size:48px">—</div>
+    <div class="hero-sub">Cliques no WhatsApp vindos do orgânico</div>
+  </div>
+  <div class="period-row" data-group="organico">
+    <button class="period-btn" data-days="0">Hoje</button>
+    <button class="period-btn" data-days="1">Ontem</button>
+    <button class="period-btn active" data-days="7">7 dias</button>
+    <button class="period-btn" data-days="30">30 dias</button>
+    <button class="period-btn" data-days="-1">Este mês</button>
+  </div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Sessões</span><div class="kpi-icon blue">👁</div></div>
+      <div class="kpi-value" id="org-sessions">—</div>
+      <div class="kpi-sub">Visitas à página de consulta</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Cliques WhatsApp</span><div class="kpi-icon green">📲</div></div>
+      <div class="kpi-value" id="org-wa-clicks">—</div>
+      <div class="kpi-sub">Cliques no botão de WA</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Taxa Conversão</span><div class="kpi-icon orange">📊</div></div>
+      <div class="kpi-value" id="org-conv-rate">—</div>
+      <div class="kpi-sub">Sessão → clique no WA</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Melhor Canal</span><div class="kpi-icon purple">🏆</div></div>
+      <div class="kpi-value" style="font-size:18px;margin-top:4px" id="org-best-channel">—</div>
+      <div class="kpi-sub" id="org-best-clicks">— cliques</div>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-toolbar">
+      <span style="font-weight:700;font-size:14px">Por Canal</span>
+      <span style="color:var(--muted);font-size:12px;margin-left:auto" id="org-period-label"></span>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--bg)">
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Canal</th>
+          <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Sessões</th>
+          <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Cliques WA</th>
+          <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Conversão</th>
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Barra</th>
+        </tr>
+      </thead>
+      <tbody id="org-tbody">
+        <tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Aguardando primeiros dados do GA4...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span>ℹ️ <b>Fontes:</b> Sessões e cliques no WhatsApp vindos de tráfego orgânico (YouTube, TikTok, Instagram). Sync automático a cada 15 min via GA4.</span>
+    <button id="btn-sync-organic" onclick="syncOrganic()" style="margin-left:auto;padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">⚡ Sincronizar agora</button>
+    <span id="org-sync-status" style="font-size:11px;color:var(--muted)"></span>
+  </div>
+</div>
+
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 const SB_URL = 'https://coyipiwkubzvewxsqimm.supabase.co';
 const SB_KEY = 'sb_publishable_Qb24qepVXHFdI_H2vJ_4Bw_IcTfCWm6';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhBxuOLBk1MFOYqoaTCezUEZWtK-eO_7cnO51x6BzZav0ZzTtk3tjUjUoLRFnodb7n/exec';
+const ADMIN_SECRET = 'drdanilo_kiwify_2026_x9p7q3';
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const state = {
   geral: { days: 7 },
   info:  { days: 7 },
   consultas: { days: 7 },
+  organico: { days: 7 },
   studio: { cat: 'infoproduto', days: 30, sort: 'score', status: 'active' },
   funilData: null,
   convData: null,
   chartGeral: null,
   chartFunil: null,
+  chartConsultasMensal: null,
 };
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
@@ -548,11 +700,15 @@ const fmt = {
 
 // endToday=true → inclui hoje no topo da janela (ex: tabs de vendas em tempo real)
 // endToday=false (padrão) → termina ontem, alinhado ao Meta Ads Manager
+// days=-1 → este mês (do dia 1 até hoje)
 function dateRange(days, endToday) {
   const now = new Date();
   const today = new Date(now); today.setHours(0,0,0,0);
   let from, to;
-  if (days === 0) {
+  if (days === -1) {
+    from = new Date(today.getFullYear(), today.getMonth(), 1);
+    to   = new Date(today);
+  } else if (days === 0) {
     from = new Date(today);
     to   = new Date(today);
   } else if (days === 1) {
@@ -569,7 +725,7 @@ function dateRange(days, endToday) {
   return {
     from: from.toISOString().slice(0,10),
     to:   to.toISOString().slice(0,10),
-    label: days===0?'hoje':days===1?'ontem':'últimos '+days+' dias'
+    label: days===-1?'este mês':days===0?'hoje':days===1?'ontem':'últimos '+days+' dias'
   };
 }
 
@@ -603,7 +759,10 @@ document.getElementById('navTabs').addEventListener('click', e => {
   const name = tab.dataset.tab;
   document.getElementById('panel-'+name).classList.add('active');
   if (name === 'funil' && !state.funilData) loadFunil();
+  if (name === 'funil') startWppRefresh();
+  else stopWppRefresh();
   if (name === 'studio') loadStudio();
+  if (name === 'organico') loadOrganico();
 });
 
 // Period buttons
@@ -618,6 +777,7 @@ document.querySelectorAll('[data-group]').forEach(group => {
       if (grp === 'geral') loadGeral();
       else if (grp === 'info') loadInfo();
       else if (grp === 'consultas') loadConsultas();
+      else if (grp === 'organico') loadOrganico();
     });
   });
 });
@@ -1068,6 +1228,7 @@ async function loadStudio() {
   const list = document.getElementById('studio-list');
   if (!ads.length) { list.innerHTML = '<div class="empty">Sem dados para o período e filtros selecionados.</div>'; return; }
 
+  window._studioAds = ads;
   list.innerHTML = ads.slice(0,15).map((a,i) => {
     const isTop = i===0;
     const thumb = a.thumbnail_url||a.image_url;
@@ -1107,8 +1268,8 @@ async function loadStudio() {
       ${a.quality_ranking||a.engagement_rate_ranking||a.conversion_rate_ranking?`
       <div class="creative-footer">
         <span>${a.frequency>0?'Frequency '+Number(a.frequency).toFixed(2)+' · ':''} ${a.quality_ranking?'Quality '+a.quality_ranking:''}${a.conversion_rate_ranking?' · Hook '+a.conversion_rate_ranking:''}</span>
-        <button class="btn-briefing" onclick="alert('Briefing gerado! (integração futura)')">📋 Gerar briefing de variação</button>
-      </div>`:`<div class="creative-footer"><span></span><button class="btn-briefing" onclick="alert('Briefing gerado! (integração futura)')">📋 Gerar briefing de variação</button></div>`}
+        <button class="btn-briefing" onclick="gerarBriefing(${i})">📋 Gerar briefing de variação</button>
+      </div>`:`<div class="creative-footer"><span></span><button class="btn-briefing" onclick="gerarBriefing(${i})">📋 Gerar briefing de variação</button></div>`}
     </div>`;
   }).join('');
 }
@@ -1183,6 +1344,7 @@ function reload() {
   else if (activeTab==='consultas') loadConsultas();
   else if (activeTab==='funil') { state.funilData=null; loadFunil(); }
   else if (activeTab==='studio') loadStudio();
+  else if (activeTab==='organico') loadOrganico();
 }
 
 // ─── REALTIME + AUTO-REFRESH ──────────────────────────────────────────────────
@@ -1212,6 +1374,7 @@ function reloadActiveTab() {
   else if (activeTab === 'info') loadInfo();
   else if (activeTab === 'consultas') loadConsultas();
   else if (activeTab === 'studio') loadStudio();
+  else if (activeTab === 'organico') loadOrganico();
 }
 
 // Debounce: evita disparar reload 300x durante batch upsert do Apps Script
@@ -1225,8 +1388,11 @@ function scheduleReload() {
 const sbClient = supabase.createClient(SB_URL, SB_KEY);
 
 sbClient.channel('dashboard-realtime')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'meta_ads' }, scheduleReload)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendas' },   scheduleReload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'meta_ads' },         scheduleReload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'vendas' },            scheduleReload)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'organic_tracking' },  () => {
+    if (document.querySelector('.tab.active')?.dataset.tab === 'organico') loadOrganico();
+  })
   .subscribe(status => {
     const el = document.getElementById('sync-age');
     if (el && status === 'SUBSCRIBED') el.title = 'Realtime ativo';
@@ -1235,10 +1401,455 @@ sbClient.channel('dashboard-realtime')
 // ── Fallback polling a cada 60 s (garante atualização mesmo sem eventos WS) ───
 setInterval(reloadActiveTab, 60 * 1000);
 
+// ─── ORGÂNICO ────────────────────────────────────────────────────────────────
+const ORG_LABELS = {
+  youtube: 'YouTube',
+  google: 'Google Orgânico',
+  '(direct)': 'Direto',
+  direct: 'Direto',
+  instagram: 'Instagram Bio',
+  facebook: 'Facebook Orgânico',
+};
+
+async function syncOrganic() {
+  const btn = document.getElementById('btn-sync-organic');
+  const status = document.getElementById('org-sync-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sincronizando...';
+  status.textContent = '';
+  try {
+    const url = APPS_SCRIPT_URL + '?action=sync_organic&secret=' + ADMIN_SECRET;
+    const r = await fetch(url, { mode: 'no-cors' });
+    // no-cors: não conseguimos ler a resposta, mas o sync foi disparado
+    btn.textContent = '✅ Sincronizado!';
+    status.textContent = 'Aguarde ~30s e clique em Atualizar';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '⚡ Sincronizar agora';
+      loadOrganico();
+    }, 30000);
+  } catch(e) {
+    btn.textContent = '⚡ Sincronizar agora';
+    btn.disabled = false;
+    status.textContent = 'Erro ao sincronizar';
+  }
+}
+
+async function loadOrganico() {
+  const { from, to } = dateRange(state.organico.days, true);
+  document.getElementById('org-period-label').textContent = `${from} → ${to}`;
+
+  const rows = await sb('vw_organic_by_source',
+    `date=gte.${from}&date=lte.${to}`);
+
+  const bySource = {};
+  rows.forEach(r => {
+    const s = (r.source || 'direct').toLowerCase();
+    if (!bySource[s]) bySource[s] = { sessions: 0, wa_clicks: 0 };
+    bySource[s].sessions  += +r.sessions  || 0;
+    bySource[s].wa_clicks += +r.wa_clicks || 0;
+  });
+
+  const totalSessions = Object.values(bySource).reduce((s, r) => s + r.sessions,  0);
+  const totalClicks   = Object.values(bySource).reduce((s, r) => s + r.wa_clicks, 0);
+  const convRate = totalSessions > 0 ? (totalClicks / totalSessions * 100).toFixed(1) + '%' : '—';
+
+  document.getElementById('org-sessions').textContent     = fmt.int(totalSessions) || '—';
+  document.getElementById('org-wa-clicks').textContent    = fmt.int(totalClicks)   || '—';
+  document.getElementById('org-total-clicks').textContent = fmt.int(totalClicks)   || '—';
+  document.getElementById('org-conv-rate').textContent    = convRate;
+
+  const sorted = Object.entries(bySource).sort((a, b) => b[1].wa_clicks - a[1].wa_clicks);
+  const best = sorted[0];
+  if (best) {
+    document.getElementById('org-best-channel').textContent = ORG_LABELS[best[0]] || best[0];
+    document.getElementById('org-best-clicks').textContent  = fmt.int(best[1].wa_clicks) + ' cliques';
+  }
+
+  const tbody = document.getElementById('org-tbody');
+  if (!sorted.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Aguardando primeiros dados do GA4...</td></tr>';
+    return;
+  }
+  const maxClicks = Math.max(...sorted.map(([, d]) => d.wa_clicks), 1);
+  tbody.innerHTML = sorted.map(([src, d]) => {
+    const label = ORG_LABELS[src] || src;
+    const conv  = d.sessions > 0 ? (d.wa_clicks / d.sessions * 100).toFixed(1) + '%' : '—';
+    const barW  = Math.round(d.wa_clicks / maxClicks * 100);
+    return `<tr style="border-top:1px solid var(--border)">
+      <td style="padding:12px 16px;font-weight:600">${label}</td>
+      <td style="padding:12px 16px;text-align:right">${fmt.int(d.sessions) || '—'}</td>
+      <td style="padding:12px 16px;text-align:right;font-weight:700">${fmt.int(d.wa_clicks) || '—'}</td>
+      <td style="padding:12px 16px;text-align:right">${conv}</td>
+      <td style="padding:12px 16px"><div style="background:var(--border);border-radius:4px;height:8px"><div style="background:var(--accent);border-radius:4px;height:8px;width:${barW}%"></div></div></td>
+    </tr>`;
+  }).join('');
+  markSynced();
+}
+
 // ─── INIT ────────────────────────────────────────────────────────────────────
 loadGeral();
 loadInfo();
 loadConsultas();
+
+// ─── BRIEFING DE VARIAÇÃO ────────────────────────────────────────────────────
+let _briefingText = '';
+
+function gerarBriefing(idx) {
+  const ads = window._studioAds || [];
+  const a = ads[idx];
+  if (!a) return;
+
+  const titulo = a.ad_title || '—';
+  const corpo  = a.ad_body  || '—';
+  const cta    = a.call_to_action_type || '—';
+  const campanha = a.campaign_name || '—';
+  const investido = fmt.brl(a.spend);
+  const roas   = fmt.x(a.roas);
+  const ctr    = a.avg_ctr > 0 ? a.avg_ctr.toFixed(2) + '%' : '—';
+  const cpa    = a.cpa ? fmt.brl(a.cpa) : '—';
+  const freq   = a.frequency > 0 ? Number(a.frequency).toFixed(2) : '—';
+
+  // Variações baseadas em regras de performance
+  const variacoes = [];
+
+  if (a.avg_ctr > 3) {
+    variacoes.push({
+      titulo: '🔥 Variação de Ângulo — Mesmo Hook, Problema Diferente',
+      desc: `O hook atual está funcionando (CTR ${ctr}). Teste o mesmo formato visual mas abordando uma dor diferente do mesmo público — ex: troque o foco de energia/libido por "dificuldade de emagrecer mesmo fazendo dieta".`
+    });
+  } else {
+    variacoes.push({
+      titulo: '🎯 Variação de Hook — Testar Abertura Mais Direta',
+      desc: `CTR atual de ${ctr} indica que a abertura pode ser mais impactante. Teste começar com uma pergunta direta ao problema principal ("Você já fez dieta mas nunca teve resultado duradouro?") sem preâmbulo.`
+    });
+  }
+
+  if (a.roas >= 1.5) {
+    variacoes.push({
+      titulo: '📱 Variação de Formato — UGC / Depoimento Real',
+      desc: `ROAS de ${roas} indica que o ângulo converte. Teste uma versão gravada em celular por paciente ou pelo próprio Dr. Danilo em tom mais pessoal, sem produção — tende a escalar melhor que vídeo produzido.`
+    });
+  } else {
+    variacoes.push({
+      titulo: '💬 Variação de Prova Social — Inserir Resultado Específico',
+      desc: `Adicione um resultado concreto logo no início da copy (ex: "Paciente perdeu 8kg em 60 dias ajustando apenas os hormônios"). Resultados específicos aumentam credibilidade e CTR em públicos frios.`
+    });
+  }
+
+  if (freq !== '—' && parseFloat(freq) > 2.5) {
+    variacoes.push({
+      titulo: '♻️ Variação de Criativo — Renovar Visual (Fadiga)',
+      desc: `Frequência de ${freq} indica que o público já viu bastante este criativo. Priorize uma variação com imagem/vídeo completamente diferente, mantendo o mesmo ângulo de copy que está funcionando.`
+    });
+  } else {
+    variacoes.push({
+      titulo: '🎬 Variação de CTA — Teste Urgência vs. Curiosidade',
+      desc: `CTA atual: "${cta}". Teste uma versão com urgência explícita ("Vagas limitadas — Agende sua avaliação") contra uma de curiosidade ("Descubra se sua falta de energia tem causa hormonal"). Isola o impacto do CTA no CR.`
+    });
+  }
+
+  // Texto para clipboard
+  _briefingText = `📋 BRIEFING DE VARIAÇÃO — ${a.ad_name || 'Anúncio'}
+Campanha: ${campanha}
+━━━━━━━━━━━━━━━━━━━━━━
+
+📊 PERFORMANCE ATUAL
+• Investido: ${investido}  |  ROAS: ${roas}  |  CTR: ${ctr}  |  CPA: ${cpa}  |  Frequência: ${freq}
+
+📝 COPY ATUAL
+Título: ${titulo}
+Corpo: ${corpo}
+CTA: ${cta}
+
+🧪 VARIAÇÕES SUGERIDAS
+
+${variacoes.map((v,i) => `${i+1}. ${v.titulo}\n${v.desc}`).join('\n\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━
+Gerado em ${new Date().toLocaleDateString('pt-BR')} via Dashboard Dr. Danilo`;
+
+  // Preenche modal
+  document.getElementById('briefing-modal-title').textContent = `📋 Briefing — ${(a.ad_name||'Anúncio').slice(0,40)}`;
+  document.getElementById('briefing-modal-body').innerHTML = `
+    <div class="briefing-section">
+      <div class="briefing-section-label">📊 Performance</div>
+      <div class="briefing-section-content">Investido: ${investido}   ROAS: ${roas}   CTR: ${ctr}   CPA: ${cpa}   Frequência: ${freq}</div>
+    </div>
+    <div class="briefing-section">
+      <div class="briefing-section-label">📝 Copy atual</div>
+      <div class="briefing-section-content">${titulo !== '—' ? '<strong>' + titulo + '</strong>\n' : ''}${corpo}</div>
+    </div>
+    <div class="briefing-section">
+      <div class="briefing-section-label">🧪 Variações sugeridas</div>
+      ${variacoes.map(v => `<div class="briefing-variation"><div class="briefing-variation-title">${v.titulo}</div><div class="briefing-variation-desc">${v.desc}</div></div>`).join('')}
+    </div>`;
+
+  document.getElementById('briefing-overlay').style.display = 'flex';
+}
+
+function closeBriefing() {
+  document.getElementById('briefing-overlay').style.display = 'none';
+}
+
+function copyBriefing() {
+  navigator.clipboard.writeText(_briefingText).then(() => {
+    const btn = document.getElementById('btn-copy-briefing');
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => { btn.textContent = '📋 Copiar briefing'; }, 2000);
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = _briefingText;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('btn-copy-briefing');
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => { btn.textContent = '📋 Copiar briefing'; }, 2000);
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBriefing(); });
+
+// ─── WPP LEADS POR CANAL ─────────────────────────────────────────────────────
+const WPP_SB_URL = 'https://dsopqujavpddgnnxugkw.supabase.co';
+const WPP_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzb3BxdWphdnBkZGdubnh1Z2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NjYxODgsImV4cCI6MjA5NTA0MjE4OH0.u1DrNaQ4lmE5vLPQ1nSCrDRsC3aQkHoYG3OSSarGjp4';
+const wppSb = supabase.createClient(WPP_SB_URL, WPP_SB_KEY);
+
+const WPP_SRC = {
+  meta_ads:          { label: 'Meta Ads',         color: '#1877f2' },
+  google_ads:        { label: 'Google Ads',        color: '#34a853' },
+  instagram_bio_sp:  { label: 'Instagram Bio SP',  color: '#e1306c' },
+  instagram_bio_gyn: { label: 'Instagram Bio GYN', color: '#c13584' },
+  youtube:           { label: 'YouTube',           color: '#ff0000' },
+  tiktok:            { label: 'TikTok',            color: '#69c9d0' },
+  website:           { label: 'Site',              color: '#6366f1' },
+  organic_direct:    { label: 'Orgânico Direto',   color: '#9ca3af' },
+};
+
+function wppSourceMeta(src) {
+  if (!src) return { label: 'Desconhecido', color: '#9ca3af' };
+  if (WPP_SRC[src]) return WPP_SRC[src];
+  if (src.startsWith('lp_google')) return { label: 'Google Ads (LP)', color: '#34a853' };
+  if (src.startsWith('lp_youtube') || src.startsWith('lp_yt')) return { label: 'YouTube (LP)', color: '#ff0000' };
+  if (src.startsWith('lp_instagram')) return { label: 'Instagram (LP)', color: '#e1306c' };
+  if (src.startsWith('lp_tiktok')) return { label: 'TikTok (LP)', color: '#69c9d0' };
+  return { label: src, color: '#9ca3af' };
+}
+
+let wppDays = 0;
+let wppRefreshTimer = null;
+
+function wppDateFrom(days) {
+  if (days < 0) return null;
+  const d = new Date();
+  if (days === 0) { d.setHours(0,0,0,0); }
+  else { d.setDate(d.getDate() - days); d.setHours(0,0,0,0); }
+  return d.toISOString();
+}
+
+async function loadWppLeads() {
+  const body = document.getElementById('wpp-leads-body');
+  if (!body) return;
+
+  let q = wppSb.from('whatsapp_leads').select('source,created_at,consulta_agendada_at,consulta_value');
+  const from = wppDateFrom(wppDays);
+  if (from) q = q.gte('created_at', from);
+
+  const { data, error } = await q;
+  if (error) { body.innerHTML = `<div class="empty">Erro ao carregar: ${error.message}</div>`; return; }
+
+  // Agrupa por source
+  const map = {};
+  for (const row of (data || [])) {
+    const src = row.source || 'organic_direct';
+    if (!map[src]) map[src] = { total: 0, agendou: 0, valor: 0 };
+    map[src].total++;
+    if (row.consulta_agendada_at) {
+      map[src].agendou++;
+      map[src].valor += Number(row.consulta_value) || 0;
+    }
+  }
+
+  const rows = Object.entries(map).sort((a,b) => b[1].total - a[1].total);
+  const totalLeads = rows.reduce((s,[,v]) => s + v.total, 0);
+  const totalAgend = rows.reduce((s,[,v]) => s + v.agendou, 0);
+  const totalValor = rows.reduce((s,[,v]) => s + v.valor, 0);
+  const maxTotal = rows[0]?.[1].total || 1;
+
+  if (rows.length === 0) {
+    body.innerHTML = `<div class="empty">Nenhum lead no período selecionado.</div>`;
+    document.getElementById('wpp-sync-age').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    return;
+  }
+
+  const taxaGeral = totalLeads ? Math.round(totalAgend / totalLeads * 100) : 0;
+  const ticketMedio = totalAgend > 0 ? totalValor / totalAgend : 0;
+
+  body.innerHTML = `
+    <div class="wpp-kpi-row">
+      <div class="wpp-kpi"><div class="wpp-kpi-label">Total de Leads</div><div class="wpp-kpi-val">${totalLeads}</div></div>
+      <div class="wpp-kpi"><div class="wpp-kpi-label">Agendaram Consulta</div><div class="wpp-kpi-val">${totalAgend}</div></div>
+      <div class="wpp-kpi"><div class="wpp-kpi-label">Taxa de Agendamento</div><div class="wpp-kpi-val">${taxaGeral}%</div></div>
+      ${totalValor > 0 ? `<div class="wpp-kpi"><div class="wpp-kpi-label">Valor Total Consultas</div><div class="wpp-kpi-val" style="font-size:16px">${fmt.brlShort(totalValor)}</div></div>` : ''}
+    </div>
+    <div style="padding:4px 0">
+      ${rows.map(([src, v]) => {
+        const m = wppSourceMeta(src);
+        const pct = maxTotal ? Math.round(v.total / maxTotal * 100) : 0;
+        const taxa = v.total ? Math.round(v.agendou / v.total * 100) : 0;
+        const valorStr = v.valor > 0 ? ` · ${fmt.brlShort(v.valor)}` : '';
+        return `
+        <div class="wpp-canal-row">
+          <div class="wpp-canal-dot" style="background:${m.color}"></div>
+          <div class="wpp-canal-label">${m.label}</div>
+          <div class="wpp-canal-bar-outer">
+            <div class="wpp-canal-bar-inner" style="width:${pct}%;background:${m.color}"></div>
+          </div>
+          <div class="wpp-canal-num">${v.total}</div>
+          <div class="wpp-canal-agend" style="width:140px">${v.agendou > 0 ? `<span style="color:var(--green)">✓ ${v.agendou} (${taxa}%)${valorStr}</span>` : `<span style="color:var(--muted)">—</span>`}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  document.getElementById('wpp-sync-age').textContent = 'Atualizado ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+// Period buttons
+document.getElementById('wpp-period-btns').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('#wpp-period-btns .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  wppDays = parseInt(btn.dataset.wppDays);
+  loadWppLeads();
+});
+
+async function loadConsultasMensal() {
+  const { data, error } = await wppSb
+    .from('whatsapp_leads')
+    .select('source,consulta_agendada_at,consulta_value')
+    .not('consulta_agendada_at', 'is', null);
+
+  const valDiv = document.getElementById('consultas-mensal-val');
+  if (!valDiv) return;
+
+  if (error || !data?.length) {
+    if (state.chartConsultasMensal) { state.chartConsultasMensal.destroy(); state.chartConsultasMensal = null; }
+    valDiv.innerHTML = `<div style="color:var(--muted);font-size:13px">Nenhuma consulta agendada ainda.</div>`;
+    return;
+  }
+
+  // Últimos 6 meses
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() - i);
+    months.push(d.toLocaleDateString('pt-BR', {month:'short', year:'2-digit'}));
+  }
+
+  const sourceSet = new Set();
+  const monthMap = {};
+  for (const row of data) {
+    const d = new Date(row.consulta_agendada_at);
+    const label = d.toLocaleDateString('pt-BR', {month:'short', year:'2-digit'});
+    if (!months.includes(label)) continue;
+    const src = row.source || 'organic_direct';
+    sourceSet.add(src);
+    if (!monthMap[label]) monthMap[label] = {};
+    if (!monthMap[label][src]) monthMap[label][src] = { count: 0, valor: 0 };
+    monthMap[label][src].count++;
+    monthMap[label][src].valor += Number(row.consulta_value) || 0;
+  }
+
+  const sources = [...sourceSet].sort((a, b) => {
+    const ta = Object.values(monthMap).reduce((s, m) => s + (m[a]?.count || 0), 0);
+    const tb = Object.values(monthMap).reduce((s, m) => s + (m[b]?.count || 0), 0);
+    return tb - ta;
+  });
+
+  const datasets = sources.map(src => {
+    const meta = wppSourceMeta(src);
+    return {
+      label: meta.label,
+      data: months.map(m => monthMap[m]?.[src]?.count || 0),
+      backgroundColor: meta.color + 'cc',
+      borderColor: meta.color,
+      borderWidth: 1,
+      borderRadius: 4,
+    };
+  });
+
+  const ctx = document.getElementById('chartConsultasMensal')?.getContext('2d');
+  if (ctx) {
+    if (state.chartConsultasMensal) state.chartConsultasMensal.destroy();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const textColor = isDark ? '#94a3b8' : '#6b7280';
+    state.chartConsultasMensal = new Chart(ctx, {
+      type: 'bar',
+      data: { labels: months, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12, color: textColor } },
+          tooltip: {
+            callbacks: {
+              afterLabel: (context) => {
+                const src = sources[context.datasetIndex];
+                const month = months[context.dataIndex];
+                const v = monthMap[month]?.[src]?.valor || 0;
+                return v > 0 ? `Valor: ${fmt.brlShort(v)}` : '';
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { font: { size: 11 }, color: textColor } },
+          y: { beginAtZero: true, grid: { color: gridColor }, ticks: { stepSize: 1, font: { size: 11 }, color: textColor } }
+        }
+      }
+    });
+  }
+
+  // Totais por canal abaixo do gráfico
+  const totalPorCanal = sources.map(src => {
+    const total = Object.values(monthMap).reduce((s, m) => s + (m[src]?.count || 0), 0);
+    const valor = Object.values(monthMap).reduce((s, m) => s + (m[src]?.valor || 0), 0);
+    return { src, total, valor };
+  }).filter(c => c.total > 0);
+
+  if (totalPorCanal.length > 0) {
+    valDiv.innerHTML = totalPorCanal.map(({ src, total, valor }) => {
+      const meta = wppSourceMeta(src);
+      return `<div style="background:var(--bg);border-radius:8px;padding:10px 14px;border-left:3px solid ${meta.color}">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${meta.label}</div>
+        <div style="font-size:20px;font-weight:800">${total}</div>
+        ${valor > 0 ? `<div style="font-size:12px;color:var(--green);margin-top:2px">${fmt.brlShort(valor)}</div>` : ''}
+      </div>`;
+    }).join('');
+  } else {
+    valDiv.innerHTML = '';
+  }
+}
+
+// Auto-refresh a cada 30s quando o tab funil está ativo
+function startWppRefresh() {
+  stopWppRefresh();
+  loadWppLeads();
+  loadConsultasMensal();
+  wppRefreshTimer = setInterval(() => {
+    const isActive = document.getElementById('panel-funil')?.classList.contains('active');
+    if (isActive) { loadWppLeads(); loadConsultasMensal(); }
+  }, 30000);
+}
+function stopWppRefresh() {
+  if (wppRefreshTimer) { clearInterval(wppRefreshTimer); wppRefreshTimer = null; }
+}
 </script>
 </body>
 </html>
