@@ -1547,6 +1547,7 @@ async function loadOrganico() {
   const tbody = document.getElementById('org-tbody');
   if (!sorted.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Aguardando primeiros dados do GA4...</td></tr>';
+    loadKommoBySource();  // carrega mesmo sem GA4
     return;
   }
   const maxClicks = Math.max(...sorted.map(([, d]) => d.wa_clicks), 1);
