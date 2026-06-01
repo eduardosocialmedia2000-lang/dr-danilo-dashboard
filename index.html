@@ -916,7 +916,7 @@ async function loadGeral() {
     sb('vw_totais_por_dia', `select=date,vendas_total,receita_total&date=gte.${from}&date=lte.${to}`),
     sb('vw_kommo_by_source', `select=valor_fechado&date=gte.${from}&date=lte.${to}`),
     // Receita/vendas info por atribuição-por-dia (não cumulativa). Evita puxar venda antiga pra hoje.
-    sb('vw_performance_by_ad_fix', `select=vendas_count_fix,receita_fix,date&campaign_name=ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`)
+    sb('vw_performance_by_ad_fix', `select=vendas_count_fix,receita_fix,date&or=(campaign_name.ilike.%25INFO%25,campaign_name.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`)
   ]);
 
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
@@ -1020,7 +1020,7 @@ let infoCurFilter = 'all';
 async function loadInfo() {
   const { from, to } = dateRange(state.info.days, true);  // inclui hoje
   const data = await sb('vw_performance_by_ad_fix',
-    `select=ad_id,ad_name,campaign_name,spend,vendas_count_fix,receita_fix,effective_status,thumbnail_url,image_url&campaign_name=ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`);
+    `select=ad_id,ad_name,campaign_name,spend,vendas_count_fix,receita_fix,effective_status,thumbnail_url,image_url&or=(campaign_name.ilike.%25INFO%25,campaign_name.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`);
 
   // Aggregate by ad_id
   const byAd = {};
@@ -1093,7 +1093,7 @@ async function loadConsultas() {
 
   const [ads, roas, kpis] = await Promise.all([
     sb('vw_performance_by_ad',
-      `select=ad_id,ad_name,campaign_name,spend,leads,link_clicks,cpc,effective_status,thumbnail_url,image_url&campaign_name=not.ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`),
+      `select=ad_id,ad_name,campaign_name,spend,leads,link_clicks,cpc,effective_status,thumbnail_url,image_url&and=(campaign_name.not.ilike.%25INFO%25,campaign_name.not.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`),
     sb('vw_roas_unificado',
       `select=ad_id,spend,leads_consulta,consultas_fechadas,receita_consultas&date=gte.${from}&date=lte.${to}`),
     sb('vw_kpis_overview',
@@ -1363,14 +1363,14 @@ async function loadStudio() {
   const { cat, days, sort, status } = state.studio;
   const { from, to } = dateRange(days, true);  // inclui hoje
   const catFilter = cat === 'consultas'
-    ? 'campaign_name=not.ilike.%25INFO%25'
+    ? 'and=(campaign_name.not.ilike.%25INFO%25,campaign_name.not.ilike.%25BIDCAP%25)'
     : `categoria=eq.${cat}`;
   // Usa vw_performance_by_ad_fix para receita/vendas (atribuição por dia, não cumulativa)
   // + vw_performance_by_ad para metadados (ad_title, ad_body, categoria, etc.)
   const [metaData, fixData] = await Promise.all([
     sb('vw_performance_by_ad', `select=ad_id,ad_name,campaign_name,categoria,effective_status,spend,ctr,cpm,cpc,frequency,impressions,link_clicks,thumbnail_url,image_url,ad_title,ad_body,call_to_action_type,purchase_meta,purchase_value_meta,quality_ranking,engagement_rate_ranking,conversion_rate_ranking&${catFilter}&date=gte.${from}&date=lte.${to}`),
     cat === 'infoproduto'
-      ? sb('vw_performance_by_ad_fix', `select=ad_id,vendas_count_fix,receita_fix&campaign_name=ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`)
+      ? sb('vw_performance_by_ad_fix', `select=ad_id,vendas_count_fix,receita_fix&or=(campaign_name.ilike.%25INFO%25,campaign_name.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`)
       : Promise.resolve([])
   ]);
 
