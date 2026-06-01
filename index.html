@@ -907,8 +907,8 @@ themeBtn.addEventListener('click', () => {
 
 // ─── VISÃO GERAL ─────────────────────────────────────────────────────────────
 async function loadGeral() {
-  const { from, to, label } = dateRange(state.geral.days);
-  document.getElementById('geral-label').textContent = 'RESUMO ' + label.toUpperCase();
+  const { from, to, label } = dateRange(state.geral.days, true);  // inclui hoje (consistente com demais abas)
+  document.getElementById('geral-label').textContent = 'RESUMO ' + label.toUpperCase() + ' (' + from + ' → ' + to + ')';
 
   const [kpis, roas, totais, kommoValor] = await Promise.all([
     sb('vw_kpis_overview', `select=categoria,spend,cliques_wa,initiate_checkouts,leads_total&date=gte.${from}&date=lte.${to}`),
