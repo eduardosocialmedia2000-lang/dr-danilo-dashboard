@@ -910,17 +910,21 @@ async function loadGeral() {
   const { from, to, label } = dateRange(state.geral.days, true);  // inclui hoje (consistente com demais abas)
   document.getElementById('geral-label').textContent = 'RESUMO ' + label.toUpperCase() + ' (' + from + ' → ' + to + ')';
 
-  const [kpis, roas, totais, kommoValor] = await Promise.all([
+  const [kpis, roas, totais, kommoValor, perfFix] = await Promise.all([
     sb('vw_kpis_overview', `select=categoria,spend,cliques_wa,initiate_checkouts,leads_total&date=gte.${from}&date=lte.${to}`),
     sb('vw_roas_unificado', `select=date,spend,receita_info,receita_consultas,receita_total&date=gte.${from}&date=lte.${to}`),
     sb('vw_totais_por_dia', `select=date,vendas_total,receita_total&date=gte.${from}&date=lte.${to}`),
-    sb('vw_kommo_by_source', `select=valor_fechado&date=gte.${from}&date=lte.${to}`)
+    sb('vw_kommo_by_source', `select=valor_fechado&date=gte.${from}&date=lte.${to}`),
+    // Receita/vendas info por atribuição-por-dia (não cumulativa). Evita puxar venda antiga pra hoje.
+    sb('vw_performance_by_ad_fix', `select=vendas_count_fix,receita_fix,date&campaign_name=ilike.%25INFO%25&date=gte.${from}&date=lte.${to}`)
   ]);
 
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
   const totalCliquesWA = kpis.filter(r=>r.categoria!=='infoproduto').reduce((s,r)=>s+(+r.cliques_wa||0),0);
-  const totalReceita_info = roas.reduce((s,r)=>s+(+r.receita_info||0),0);
-  const totalVendas = totais.reduce((s,r)=>s+(+r.vendas_total||0),0);
+  // Receita info: usa vw_performance_by_ad_fix (atribuição por dia da venda real, não data do gasto)
+  const totalReceita_info = perfFix.reduce((s,r)=>s+(+r.receita_fix||0),0);
+  // Vendas: soma do _fix (consistente com a receita acima)
+  const totalVendas = perfFix.reduce((s,r)=>s+(+r.vendas_count_fix||0),0);
   // Receita consultas: usa Kommo valor_fechado (mais preciso que vw_roas_unificado)
   const kommoReceitaCons = (kommoValor||[]).reduce((s,r)=>s+(+r.valor_fechado||0),0);
   const totalReceita_cons = kommoReceitaCons > 0 ? kommoReceitaCons : roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
@@ -943,15 +947,16 @@ async function loadGeral() {
 
   // Build daily chart data
   const byDate = {};
+  // Spend vem do roas (gasto por dia está correto). Receita_consultas também por dia.
   roas.forEach(r => {
     if (!byDate[r.date]) byDate[r.date] = { spend:0, receita:0 };
     byDate[r.date].spend += +r.spend||0;
-    byDate[r.date].receita += (+r.receita_info||0)+(+r.receita_consultas||0);
+    byDate[r.date].receita += (+r.receita_consultas||0);
   });
-  // Fill receita from totais where roas has 0
-  totais.forEach(r => {
+  // Receita info vem do _fix (atribuição por dia da venda real, não cumulativa)
+  perfFix.forEach(r => {
     if (!byDate[r.date]) byDate[r.date] = { spend:0, receita:0 };
-    if (!byDate[r.date].receita) byDate[r.date].receita = +r.receita_total||0;
+    byDate[r.date].receita += +r.receita_fix||0;
   });
 
   const dates = Object.keys(byDate).sort();
