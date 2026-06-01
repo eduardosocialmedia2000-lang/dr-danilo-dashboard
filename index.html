@@ -433,6 +433,61 @@ label.check input{accent-color:var(--accent)}
       <button class="show-more-btn" onclick="showAll('consultas-tbody')">Mostrar todos</button>
     </div>
   </div>
+
+  <!-- Google Ads — Leads via Kommo UTM -->
+  <div style="margin-top:32px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:32px;height:32px;background:#4285f4;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px">🔍</div>
+      <div>
+        <div style="font-weight:700;font-size:16px">Google Ads — Leads atribuídos</div>
+        <div style="font-size:12px;color:var(--muted)">Leads com utm_source=google capturados no Kommo · Atribuição por clique via link rastreado</div>
+      </div>
+    </div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px">
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Leads Google</span><div class="kpi-icon blue">🔍</div></div>
+        <div class="kpi-value" id="gads-leads">—</div>
+        <div class="kpi-sub">Capturados via Kommo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Agendamentos</span><div class="kpi-icon green">📅</div></div>
+        <div class="kpi-value" id="gads-fechados">—</div>
+        <div class="kpi-sub">Consultas fechadas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Taxa Conversão</span><div class="kpi-icon orange">📊</div></div>
+        <div class="kpi-value" id="gads-taxa">—</div>
+        <div class="kpi-sub">Lead → Agendamento</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Melhor Campanha</span><div class="kpi-icon purple">🏆</div></div>
+        <div class="kpi-value" style="font-size:14px;margin-top:4px" id="gads-best">—</div>
+        <div class="kpi-sub" id="gads-best-leads">— leads</div>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-toolbar">
+        <span style="font-weight:700;font-size:14px">🔍 Google Ads por Campanha (via Kommo)</span>
+        <span style="color:var(--muted);font-size:12px;margin-left:auto" id="gads-period-label"></span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:var(--bg)">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Campanha</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Leads</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Fechados</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Conversão</th>
+          </tr>
+        </thead>
+        <tbody id="gads-tbody">
+          <tr><td colspan="4" style="padding:40px;text-align:center;color:var(--muted)">Carregando dados do Google Ads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;font-size:12px;color:var(--muted);padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px">
+      ℹ️ <b>Integração parcial:</b> Mostra leads rastreados via UTM (utm_source=google). Para investimento, CPC e ROAS do Google Ads, é necessário integrar a Google Ads API ao Supabase.
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════ FUNIL DE CONSULTAS ═══════════════ -->
@@ -692,6 +747,18 @@ label.check input{accent-color:var(--accent)}
         <tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Carregando dados do Kommo...</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Explicação "Direto" + links de rastreamento -->
+  <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:12px;padding:16px;margin-top:16px;font-size:13px">
+    <div style="font-weight:700;margin-bottom:8px">💡 O que é "Direto"?</div>
+    <p style="margin:0 0 10px;color:var(--muted)">Leads que chegaram no WhatsApp <b>sem passar por um link rastreado</b> — número salvo, contato direto ou link sem UTM. Para identificar a origem real, use sempre os links de rastreamento:</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <span style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px">📸 /consulta-ig → Instagram</span>
+      <span style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px">🎵 /consulta-ttk → TikTok</span>
+      <span style="background:rgba(255,0,0,.1);border:1px dashed rgba(255,0,0,.3);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px;color:#ef4444">❌ /consulta-yt → YouTube (criar)</span>
+      <span style="background:rgba(255,0,0,.1);border:1px dashed rgba(255,0,0,.3);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px;color:#ef4444">❌ /consulta-wa → WhatsApp Status (criar)</span>
+    </div>
   </div>
 
   <!-- Gráfico evolução de leads por origem -->
@@ -1050,7 +1117,57 @@ async function loadConsultas() {
   window._roasByAd = roasByAd;
 
   renderConsultasTable(roasByAd);
+  loadGoogleAdsKommo(from, to);
   markSynced();
+}
+
+async function loadGoogleAdsKommo(from, to) {
+  // Busca leads do Google via Kommo (utm_source=google, agrupados por utm_campaign)
+  const rows = await sb('vw_kommo_by_source',
+    `select=source,leads,fechados,date&source=in.(google,google_ads)&date=gte.${from}&date=lte.${to}`);
+
+  // Também busca por campanha (utm_campaign) para detalhar
+  const byCampaign = {};
+  (rows || []).forEach(r => {
+    const key = 'Google Ads'; // por ora sem breakdown por campanha (sem utm_campaign na view)
+    if (!byCampaign[key]) byCampaign[key] = { leads: 0, fechados: 0 };
+    byCampaign[key].leads    += +r.leads    || 0;
+    byCampaign[key].fechados += +r.fechados || 0;
+  });
+
+  const totalLeads    = Object.values(byCampaign).reduce((s,d) => s + d.leads, 0);
+  const totalFechados = Object.values(byCampaign).reduce((s,d) => s + d.fechados, 0);
+  const taxa = totalLeads > 0 ? (totalFechados / totalLeads * 100).toFixed(1) + '%' : '—';
+
+  document.getElementById('gads-leads').textContent    = fmt.int(totalLeads)    || '—';
+  document.getElementById('gads-fechados').textContent = fmt.int(totalFechados) || '—';
+  document.getElementById('gads-taxa').textContent     = taxa;
+
+  const { from: f, to: t } = { from, to };
+  const periodEl = document.getElementById('gads-period-label');
+  if (periodEl) periodEl.textContent = `${from} → ${to}`;
+
+  const sorted = Object.entries(byCampaign).sort((a,b) => b[1].leads - a[1].leads);
+  const best = sorted[0];
+  if (best) {
+    document.getElementById('gads-best').textContent      = best[0];
+    document.getElementById('gads-best-leads').textContent = fmt.int(best[1].leads) + ' leads';
+  }
+
+  const tbody = document.getElementById('gads-tbody');
+  if (!sorted.length || totalLeads === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:40px;text-align:center;color:var(--muted)">Nenhum lead do Google rastreado no período — use links com utm_source=google</td></tr>';
+    return;
+  }
+  tbody.innerHTML = sorted.map(([camp, d]) => {
+    const conv = d.leads > 0 ? (d.fechados / d.leads * 100).toFixed(1) + '%' : '—';
+    return `<tr style="border-top:1px solid var(--border)">
+      <td style="padding:12px 16px;font-weight:600">🔍 ${camp}</td>
+      <td style="padding:12px 16px;text-align:right;font-weight:700">${fmt.int(d.leads)}</td>
+      <td style="padding:12px 16px;text-align:right">${fmt.int(d.fechados)}</td>
+      <td style="padding:12px 16px;text-align:right;font-weight:600;color:${d.fechados>0?'var(--green,#22c55e)':'var(--muted)'}">${conv}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderConsultasTable(roasByAd) {
