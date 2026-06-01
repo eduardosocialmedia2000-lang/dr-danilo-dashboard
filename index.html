@@ -660,6 +660,28 @@ label.check input{accent-color:var(--accent)}
     <button id="btn-sync-organic" onclick="syncOrganic()" style="margin-left:auto;padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">⚡ Sincronizar agora</button>
     <span id="org-sync-status" style="font-size:11px;color:var(--muted)"></span>
   </div>
+
+  <!-- KOMMO: Leads por Origem -->
+  <div class="table-card" style="margin-top:24px">
+    <div class="table-toolbar">
+      <span style="font-weight:700;font-size:14px">📍 Leads por Origem (Kommo CRM)</span>
+      <span style="color:var(--muted);font-size:12px;margin-left:8px">Capturado via UTM + Link de rastreamento</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--bg)">
+          <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Origem</th>
+          <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Leads</th>
+          <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Fechados</th>
+          <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Conversão</th>
+          <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Valor Fechado</th>
+        </tr>
+      </thead>
+      <tbody id="kommo-source-tbody">
+        <tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Carregando dados do Kommo...</td></tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script>
@@ -1407,9 +1429,65 @@ const ORG_LABELS = {
   google: 'Google Orgânico',
   '(direct)': 'Direto',
   direct: 'Direto',
+  direto: 'Direto',
   instagram: 'Instagram Bio',
+  instagram_bio: 'Instagram Bio',
   facebook: 'Facebook Orgânico',
+  tiktok: 'TikTok Bio',
+  tiktok_bio: 'TikTok Bio',
+  google_ads: 'Google Ads',
+  meta_ads: 'Meta Ads',
+  whatsapp: 'WhatsApp',
 };
+
+async function loadKommoBySource() {
+  const { from, to } = dateRange(state.organico.days, true);
+  const tbody = document.getElementById('kommo-source-tbody');
+  try {
+    const rows = await sb('vw_kommo_by_source',
+      `date=gte.${from}&date=lte.${to}`);
+
+    if (!rows || rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Sem leads com origem rastreada no período</td></tr>';
+      return;
+    }
+
+    // Agrupar por source
+    const bySource = {};
+    rows.forEach(r => {
+      const s = (r.source || 'direto').toLowerCase();
+      if (!bySource[s]) bySource[s] = { leads: 0, fechados: 0, valor: 0 };
+      bySource[s].leads    += +r.leads    || 0;
+      bySource[s].fechados += +r.fechados || 0;
+      bySource[s].valor    += +r.valor_fechado || 0;
+    });
+
+    const sorted = Object.entries(bySource).sort((a, b) => b[1].leads - a[1].leads);
+
+    tbody.innerHTML = sorted.map(([src, d]) => {
+      const label = ORG_LABELS[src] || src;
+      const conv  = d.leads > 0 ? (d.fechados / d.leads * 100).toFixed(1) + '%' : '—';
+      const valor = d.valor > 0 ? 'R$ ' + fmt.int(d.valor) : '—';
+      const icon  = src.includes('instagram') ? '📸' :
+                    src.includes('tiktok')    ? '🎵' :
+                    src.includes('google_ads')? '🔍' :
+                    src.includes('google')    ? '🔎' :
+                    src.includes('meta')      ? '📘' :
+                    src.includes('whatsapp')  ? '💬' :
+                    src.includes('direto') || src.includes('direct') ? '🔗' : '📍';
+      return `<tr style="border-top:1px solid var(--border)">
+        <td style="padding:12px 16px;font-weight:600">${icon} ${label}</td>
+        <td style="padding:12px 16px;text-align:right;font-weight:700">${fmt.int(d.leads)}</td>
+        <td style="padding:12px 16px;text-align:right">${fmt.int(d.fechados)}</td>
+        <td style="padding:12px 16px;text-align:right">${conv}</td>
+        <td style="padding:12px 16px;text-align:right;color:var(--green,#22c55e);font-weight:600">${valor}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Erro ao carregar — execute a migração SQL primeiro</td></tr>`;
+    console.error('loadKommoBySource:', e);
+  }
+}
 
 async function syncOrganic() {
   const btn = document.getElementById('btn-sync-organic');
@@ -1485,6 +1563,7 @@ async function loadOrganico() {
     </tr>`;
   }).join('');
   markSynced();
+  loadKommoBySource();  // carrega leads por origem do Kommo
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
