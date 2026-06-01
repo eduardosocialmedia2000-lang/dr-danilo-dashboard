@@ -913,16 +913,14 @@ async function loadGeral() {
   const [kpis, roas, totais, kommoValor] = await Promise.all([
     sb('vw_kpis_overview', `select=categoria,spend,cliques_wa,initiate_checkouts,leads_total&date=gte.${from}&date=lte.${to}`),
     sb('vw_roas_unificado', `select=date,spend,receita_info,receita_consultas,receita_total&date=gte.${from}&date=lte.${to}`),
-    // vw_performance_by_ad para contar vendas em tempo real (vw_totais_por_dia pode estar desatualizado)
-    sb('vw_performance_by_ad', `select=vendas_kiwify&date=gte.${from}&date=lte.${to}`),
+    sb('vw_totais_por_dia', `select=date,vendas_total,receita_total&date=gte.${from}&date=lte.${to}`),
     sb('vw_kommo_by_source', `select=valor_fechado&date=gte.${from}&date=lte.${to}`)
   ]);
 
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
   const totalCliquesWA = kpis.filter(r=>r.categoria!=='infoproduto').reduce((s,r)=>s+(+r.cliques_wa||0),0);
   const totalReceita_info = roas.reduce((s,r)=>s+(+r.receita_info||0),0);
-  // Vendas: vw_performance_by_ad é atualizado a cada hora (fonte correta)
-  const totalVendas = totais.reduce((s,r)=>s+(+r.vendas_kiwify||0),0);
+  const totalVendas = totais.reduce((s,r)=>s+(+r.vendas_total||0),0);
   // Receita consultas: usa Kommo valor_fechado (mais preciso que vw_roas_unificado)
   const kommoReceitaCons = (kommoValor||[]).reduce((s,r)=>s+(+r.valor_fechado||0),0);
   const totalReceita_cons = kommoReceitaCons > 0 ? kommoReceitaCons : roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
@@ -1592,15 +1590,41 @@ const ORG_LABELS = {
   whatsapp: 'WhatsApp',
 };
 
+function resetKommoKPIs() {
+  // Reseta todos os KPIs e cards para estado limpo antes de carregar
+  ['kommo-total-leads','kommo-total-fechados','kommo-taxa-conv'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '—';
+  });
+  const best = document.getElementById('kommo-best-source');
+  const bestLd = document.getElementById('kommo-best-leads');
+  if (best) best.textContent = '—';
+  if (bestLd) bestLd.textContent = '— leads';
+  const hero = document.getElementById('org-total-clicks');
+  if (hero) hero.textContent = '—';
+  const cards = document.getElementById('kommo-channel-cards');
+  if (cards) cards.innerHTML = '';
+}
+
 async function loadKommoBySource() {
   const { from, to } = dateRange(state.organico.days, true);
   const tbody = document.getElementById('kommo-source-tbody');
+
+  // Reseta KPIs imediatamente para evitar dados obsoletos
+  resetKommoKPIs();
+  const periodLbl = document.getElementById('kommo-period-label');
+  if (periodLbl) periodLbl.textContent = `${from} → ${to}`;
+
   try {
     const rows = await sb('vw_kommo_by_source',
       `date=gte.${from}&date=lte.${to}`);
 
     if (!rows || rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Sem leads com origem rastreada no período</td></tr>';
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">
+        Sem leads rastreados de <b>${from}</b> a <b>${to}</b><br>
+        <span style="font-size:12px;margin-top:4px;display:block">O sync automático roda a cada 15 minutos. Dados recentes podem demorar até aparecer.</span>
+      </td></tr>`;
+      const hero = document.getElementById('org-total-clicks');
+      if (hero) hero.textContent = '0';
       return;
     }
 
