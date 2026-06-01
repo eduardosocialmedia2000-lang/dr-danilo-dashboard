@@ -1051,7 +1051,7 @@ async function loadInfo() {
 function renderInfoTable() {
   const rows = infoAllRows.filter(r => {
     if (infoCurFilter === 'active') return r.effective_status === 'ACTIVE';
-    if (infoCurFilter === 'problem') return r.effective_status !== 'ACTIVE';
+    if (infoCurFilter === 'problem') return r.effective_status && r.effective_status !== 'ACTIVE';
     return true;
   });
   const maxRoas = Math.max(...rows.map(r => r.spend > 0 ? r.receita/r.spend : 0));
@@ -1063,14 +1063,14 @@ function renderInfoTable() {
     const rc = roasClass(roas);
     const thumb = r.thumbnail_url||r.image_url;
     const isTop = i===0 && roas>0;
-    return `<tr data-status="${r.effective_status==='ACTIVE'?'active':'problem'}">
+    return `<tr data-status="${(!r.effective_status||r.effective_status==='ACTIVE')?'active':'problem'}">
       <td><div class="ad-cell">
         ${thumb?`<img class="ad-thumb" src="${thumb}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}
         <div class="ad-thumb-placeholder" style="${thumb?'display:none':''}">📸</div>
         <div class="ad-info">
           <div class="ad-name">${isTop?'<span class="top-badge">#1 TOP PERFORMER</span> ':''}<span>${r.ad_name||'—'}</span></div>
           <div class="ad-campaign">${r.campaign_name||'—'}</div>
-          <div><span class="status-badge"><span class="status-dot ${r.effective_status==='ACTIVE'?'active':'problem'}"></span>${r.effective_status==='ACTIVE'?'Ativo':'Com problema'}</span></div>
+          <div><span class="status-badge"><span class="status-dot ${(!r.effective_status||r.effective_status==='ACTIVE')?'active':'problem'}"></span>${(!r.effective_status||r.effective_status==='ACTIVE')?'Ativo':'Com problema'}</span></div>
         </div>
       </div></td>
       <td>${fmt.brl(r.spend)}</td>
@@ -1191,7 +1191,7 @@ async function loadGoogleAdsKommo(from, to) {
 function renderConsultasTable(roasByAd) {
   const rows = consultasAllRows.filter(r => {
     if (consultasCurFilter === 'active') return r.effective_status === 'ACTIVE';
-    if (consultasCurFilter === 'problem') return r.effective_status !== 'ACTIVE';
+    if (consultasCurFilter === 'problem') return r.effective_status && r.effective_status !== 'ACTIVE';
     return true;
   });
   const tbody = document.getElementById('consultas-tbody');
@@ -1205,14 +1205,14 @@ function renderConsultasTable(roasByAd) {
     const rc = rd.receita > 0 ? roasClass(roasReal) : '';
     const cpc = r.clicks > 0 ? r.spend/r.clicks : 0;
     const thumb = r.thumbnail_url||r.image_url;
-    return `<tr data-status="${r.effective_status==='ACTIVE'?'active':'problem'}">
+    return `<tr data-status="${(!r.effective_status||r.effective_status==='ACTIVE')?'active':'problem'}">
       <td><div class="ad-cell">
         ${thumb?`<img class="ad-thumb" src="${thumb}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}
         <div class="ad-thumb-placeholder" style="${thumb?'display:none':''}">📸</div>
         <div class="ad-info">
           <div class="ad-name">${r.ad_name||'—'}</div>
           <div class="ad-campaign">${r.campaign_name||'—'}</div>
-          <div><span class="status-badge"><span class="status-dot ${r.effective_status==='ACTIVE'?'active':'problem'}"></span>${r.effective_status==='ACTIVE'?'Ativo':'Com problema'}</span></div>
+          <div><span class="status-badge"><span class="status-dot ${(!r.effective_status||r.effective_status==='ACTIVE')?'active':'problem'}"></span>${(!r.effective_status||r.effective_status==='ACTIVE')?'Ativo':'Com problema'}</span></div>
         </div>
       </div></td>
       <td>${fmt.brl(r.spend)}</td>
@@ -1444,7 +1444,7 @@ async function loadStudio() {
             <div class="creative-name">${a.ad_name||'—'}</div>
           </div>
           <div class="creative-meta">${a.campaign_name||'—'} · Ativo · Investido ${fmt.brl(a.spend)}</div>
-          <div style="margin-top:4px"><span class="status-badge"><span class="status-dot ${a.effective_status==='ACTIVE'?'active':'problem'}"></span>${a.effective_status==='ACTIVE'?'Ativo':'Com problema'}</span></div>
+          <div style="margin-top:4px"><span class="status-badge"><span class="status-dot ${(!a.effective_status||a.effective_status==='ACTIVE')?'active':'problem'}"></span>${(!a.effective_status||a.effective_status==='ACTIVE')?'Ativo':'Com problema'}</span></div>
         </div>
       </div>
       ${whys.length?`<div class="creative-why"><b>POR QUE FUNCIONA</b><br>${whys.join('<br>')}</div>`:''}
