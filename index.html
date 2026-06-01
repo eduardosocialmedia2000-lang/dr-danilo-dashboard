@@ -921,20 +921,23 @@ async function loadGeral() {
 
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
   const totalCliquesWA = kpis.filter(r=>r.categoria!=='infoproduto').reduce((s,r)=>s+(+r.cliques_wa||0),0);
-  // Receita info: usa vw_performance_by_ad_fix (atribuição por dia da venda real, não data do gasto)
-  const totalReceita_info = perfFix.reduce((s,r)=>s+(+r.receita_fix||0),0);
-  // Vendas: soma do _fix (consistente com a receita acima)
-  const totalVendas = perfFix.reduce((s,r)=>s+(+r.vendas_count_fix||0),0);
+  // FATURAMENTO TOTAL Kiwify (todas as vendas pela data real da compra) → card "Vendas (Kiwify)"
+  const totalVendas = totais.reduce((s,r)=>s+(+r.vendas_total||0),0);
+  const faturamentoTotal = totais.reduce((s,r)=>s+(+r.receita_total||0),0);
+  // RECEITA ATRIBUÍDA A ANÚNCIOS (vw_performance_by_ad_fix, por dia da venda) → usada no ROAS
+  const receitaInfoAds = perfFix.reduce((s,r)=>s+(+r.receita_fix||0),0);
   // Receita consultas: usa Kommo valor_fechado (mais preciso que vw_roas_unificado)
   const kommoReceitaCons = (kommoValor||[]).reduce((s,r)=>s+(+r.valor_fechado||0),0);
   const totalReceita_cons = kommoReceitaCons > 0 ? kommoReceitaCons : roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
-  const totalRoas = totalSpend > 0 ? (totalReceita_info + totalReceita_cons) / totalSpend : 0;
-  const roasInfo = totalSpend > 0 ? totalReceita_info / totalSpend : 0;
+  // ROAS = retorno atribuível a anúncios ÷ gasto (info via _fix + consultas via Kommo)
+  const totalRoas = totalSpend > 0 ? (receitaInfoAds + totalReceita_cons) / totalSpend : 0;
+  const roasInfo = totalSpend > 0 ? receitaInfoAds / totalSpend : 0;
   const roasCons = totalSpend > 0 ? totalReceita_cons / totalSpend : 0;
 
   document.getElementById('geral-invest').textContent = fmt.brl(totalSpend);
   document.getElementById('geral-roas').textContent = fmt.x(totalRoas);
-  document.getElementById('g-vendas').textContent = totalVendas + ' • ' + fmt.brl(totalReceita_info);
+  // Card "Vendas (Kiwify)": faturamento TOTAL do infoproduto (não só o atribuído a anúncio)
+  document.getElementById('g-vendas').textContent = totalVendas + ' • ' + fmt.brl(faturamentoTotal);
   document.getElementById('g-leads').textContent = totalCliquesWA > 0 ? fmt.int(totalCliquesWA) : '—';
   document.getElementById('g-leads-delta').innerHTML = '';
 
@@ -943,7 +946,7 @@ async function loadGeral() {
   rEl.className = 'kpi-value roas-' + roasClass(totalRoas);
   document.getElementById('g-retorno-sub').textContent = `Info: ${fmt.x(roasInfo)} · Consultas: ${fmt.x(roasCons)}`;
   document.getElementById('g-retorno-badges').innerHTML =
-    `<span class="badge">Info: ${fmt.brl(totalReceita_info)}</span><span class="badge">Consultas: ${fmt.brl(totalReceita_cons)}</span>`;
+    `<span class="badge">Info: ${fmt.brl(receitaInfoAds)}</span><span class="badge">Consultas: ${fmt.brl(totalReceita_cons)}</span>`;
 
   // Build daily chart data
   const byDate = {};
