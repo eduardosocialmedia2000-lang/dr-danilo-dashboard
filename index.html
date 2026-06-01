@@ -609,8 +609,8 @@ label.check input{accent-color:var(--accent)}
   <div class="period-row" data-group="organico">
     <button class="period-btn" data-days="0">Hoje</button>
     <button class="period-btn" data-days="1">Ontem</button>
-    <button class="period-btn active" data-days="7">7 dias</button>
-    <button class="period-btn" data-days="30">30 dias</button>
+    <button class="period-btn" data-days="7">7 dias</button>
+    <button class="period-btn active" data-days="30">30 dias</button>
     <button class="period-btn" data-days="-1">Este mês</button>
   </div>
   <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
@@ -662,6 +662,30 @@ label.check input{accent-color:var(--accent)}
   </div>
 
   <!-- KOMMO: Leads por Origem -->
+  <!-- KPIs Kommo -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-top:24px">
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Total Leads Rastreados</span><div class="kpi-icon blue">📍</div></div>
+      <div class="kpi-value" id="kommo-total-leads">—</div>
+      <div class="kpi-sub">Todos com origem identificada</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Consultas Fechadas</span><div class="kpi-icon green">✅</div></div>
+      <div class="kpi-value" id="kommo-total-fechados">—</div>
+      <div class="kpi-sub">Leads que viraram pacientes</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Taxa de Conversão</span><div class="kpi-icon orange">📊</div></div>
+      <div class="kpi-value" id="kommo-taxa-conv">—</div>
+      <div class="kpi-sub">Lead → Consulta Agendada</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><span class="kpi-label">Melhor Origem</span><div class="kpi-icon purple">🏆</div></div>
+      <div class="kpi-value" style="font-size:18px;margin-top:4px" id="kommo-best-source">—</div>
+      <div class="kpi-sub" id="kommo-best-leads">— leads</div>
+    </div>
+  </div>
+
   <div class="table-card" style="margin-top:24px">
     <div class="table-toolbar">
       <span style="font-weight:700;font-size:14px">📍 Leads por Origem (Kommo CRM)</span>
@@ -696,7 +720,7 @@ const state = {
   geral: { days: 7 },
   info:  { days: 7 },
   consultas: { days: 7 },
-  organico: { days: 7 },
+  organico: { days: 30 },
   studio: { cat: 'infoproduto', days: 30, sort: 'score', status: 'active' },
   funilData: null,
   convData: null,
@@ -1464,6 +1488,19 @@ async function loadKommoBySource() {
     });
 
     const sorted = Object.entries(bySource).sort((a, b) => b[1].leads - a[1].leads);
+
+    // Atualizar KPIs
+    const totalLeads = Object.values(bySource).reduce((s,d) => s + d.leads, 0);
+    const totalFechados = Object.values(bySource).reduce((s,d) => s + d.fechados, 0);
+    const taxaConv = totalLeads > 0 ? (totalFechados / totalLeads * 100).toFixed(1) + '%' : '—';
+    const best = sorted[0];
+    document.getElementById('kommo-total-leads').textContent = fmt.int(totalLeads) || '—';
+    document.getElementById('kommo-total-fechados').textContent = fmt.int(totalFechados) || '—';
+    document.getElementById('kommo-taxa-conv').textContent = taxaConv;
+    if (best) {
+      document.getElementById('kommo-best-source').textContent = ORG_LABELS[best[0]] || best[0];
+      document.getElementById('kommo-best-leads').textContent = fmt.int(best[1].leads) + ' leads';
+    }
 
     tbody.innerHTML = sorted.map(([src, d]) => {
       const label = ORG_LABELS[src] || src;
