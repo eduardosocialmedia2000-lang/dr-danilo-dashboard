@@ -296,7 +296,7 @@ label.check input{accent-color:var(--accent)}
       <div class="kpi-header"><div class="kpi-label">Leads de Consulta</div><div class="kpi-icon purple">📞</div></div>
       <div class="kpi-value" id="g-leads">—</div>
       <div class="kpi-delta" id="g-leads-delta"></div>
-      <div class="kpi-sub">Leads atribuídos via Kommo (UTM)</div>
+      <div class="kpi-sub" id="g-leads-sub">Leads de consulta (WhatsApp)</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-header"><div class="kpi-label">Retorno Total</div><div class="kpi-icon green">📈</div></div>
@@ -846,15 +846,16 @@ async function loadGeral() {
   const [kpis, roas, totais, kommoValor] = await Promise.all([
     sb('vw_kpis_overview', `select=categoria,spend,cliques_wa,initiate_checkouts,leads_total&date=gte.${from}&date=lte.${to}`),
     sb('vw_roas_unificado', `select=date,spend,receita_info,receita_consultas,receita_total&date=gte.${from}&date=lte.${to}`),
-    sb('vw_totais_por_dia', `select=date,vendas_total,receita_total&date=gte.${from}&date=lte.${to}`),
+    // vw_performance_by_ad para contar vendas em tempo real (vw_totais_por_dia pode estar desatualizado)
+    sb('vw_performance_by_ad', `select=vendas_kiwify&date=gte.${from}&date=lte.${to}`),
     sb('vw_kommo_by_source', `select=valor_fechado&date=gte.${from}&date=lte.${to}`)
   ]);
 
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
-  const totalVendas = totais.reduce((s, r) => s + (+r.vendas_total||0), 0);
-  const totalReceita = totais.reduce((s, r) => s + (+r.receita_total||0), 0);
   const totalCliquesWA = kpis.filter(r=>r.categoria!=='infoproduto').reduce((s,r)=>s+(+r.cliques_wa||0),0);
   const totalReceita_info = roas.reduce((s,r)=>s+(+r.receita_info||0),0);
+  // Vendas: vw_performance_by_ad é atualizado a cada hora (fonte correta)
+  const totalVendas = totais.reduce((s,r)=>s+(+r.vendas_kiwify||0),0);
   // Receita consultas: usa Kommo valor_fechado (mais preciso que vw_roas_unificado)
   const kommoReceitaCons = (kommoValor||[]).reduce((s,r)=>s+(+r.valor_fechado||0),0);
   const totalReceita_cons = kommoReceitaCons > 0 ? kommoReceitaCons : roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
@@ -866,7 +867,7 @@ async function loadGeral() {
   document.getElementById('geral-roas').textContent = fmt.x(totalRoas);
   document.getElementById('g-vendas').textContent = totalVendas + ' • ' + fmt.brl(totalReceita_info);
   document.getElementById('g-leads').textContent = totalCliquesWA > 0 ? fmt.int(totalCliquesWA) : '—';
-  document.getElementById('g-leads-delta').innerHTML = totalCliquesWA > 0 ? '' : 'Leads atribuídos via Kommo (UTM)';
+  document.getElementById('g-leads-delta').innerHTML = '';
 
   const rEl = document.getElementById('g-retorno');
   rEl.textContent = fmt.x(totalRoas);
