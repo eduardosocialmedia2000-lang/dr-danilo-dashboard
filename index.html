@@ -908,7 +908,7 @@ themeBtn.addEventListener('click', () => {
 // ─── VISÃO GERAL ─────────────────────────────────────────────────────────────
 async function loadGeral() {
   const { from, to, label } = dateRange(state.geral.days, true);  // inclui hoje (consistente com demais abas)
-  document.getElementById('geral-label').textContent = 'RESUMO ' + label.toUpperCase() + ' (' + from + ' → ' + to + ')';
+  // label set inside loadGeral after data
 
   const [kpis, roas, totais, kommoValor, perfFix] = await Promise.all([
     sb('vw_kpis_overview', `select=categoria,spend,cliques_wa,initiate_checkouts,leads_total&date=gte.${from}&date=lte.${to}`),
@@ -921,11 +921,23 @@ async function loadGeral() {
 
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
   const totalCliquesWA = kpis.filter(r=>r.categoria!=='infoproduto').reduce((s,r)=>s+(+r.cliques_wa||0),0);
-  // FATURAMENTO TOTAL Kiwify (todas as vendas pela data real da compra) → card "Vendas (Kiwify)"
-  const totalVendas = totais.reduce((s,r)=>s+(+r.vendas_total||0),0);
-  const faturamentoTotal = totais.reduce((s,r)=>s+(+r.receita_total||0),0);
-  // RECEITA ATRIBUÍDA A ANÚNCIOS (vw_performance_by_ad_fix, por dia da venda) → usada no ROAS
-  const receitaInfoAds = perfFix.reduce((s,r)=>s+(+r.receita_fix||0),0);
+
+  // VENDAS: usa vw_performance_by_ad_fix quando disponível (tempo real),
+  // senão cai para vw_totais_por_dia (sync diário, pode estar atrasado para "hoje")
+  const vendasFix    = perfFix.reduce((s,r)=>s+(+r.vendas_count_fix||0),0);
+  const receitaFix   = perfFix.reduce((s,r)=>s+(+r.receita_fix||0),0);
+  const vendasTotais = totais.reduce((s,r)=>s+(+r.vendas_total||0),0);
+  const receitaTotais= totais.reduce((s,r)=>s+(+r.receita_total||0),0);
+  // Usa fonte que tiver dados (fix é mais rápido; totais pode estar desatualizado no mesmo dia)
+  const totalVendas     = vendasFix  > 0 ? vendasFix   : vendasTotais;
+  const faturamentoTotal= receitaFix > 0 ? receitaFix  : receitaTotais;
+  const receitaInfoAds  = receitaFix > 0 ? receitaFix  : roas.reduce((s,r)=>s+(+r.receita_info||0),0);
+
+  // Aviso para dia em andamento (quando "hoje" está selecionado)
+  const isToday = state.geral.days === 0;
+  const labelEl = document.getElementById('geral-label');
+  if (labelEl) labelEl.textContent = 'RESUMO ' + label.toUpperCase() + ' (' + from + ' → ' + to + ')' +
+    (isToday ? ' ⚠️ dia em andamento' : '');
   // Receita consultas: usa Kommo valor_fechado (mais preciso que vw_roas_unificado)
   const kommoReceitaCons = (kommoValor||[]).reduce((s,r)=>s+(+r.valor_fechado||0),0);
   const totalReceita_cons = kommoReceitaCons > 0 ? kommoReceitaCons : roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
