@@ -1244,35 +1244,39 @@ async function loadFunil() {
   const allLeads = funilRows.reduce((s,r)=>s+(+r.lead_count||0),0);
   const novos30  = funilRows.reduce((s,r)=>s+(+r.leads_ult_30d||0),0);
   const pipeVal  = funilRows.reduce((s,r)=>s+(+r.pipeline_value_brl||0),0);
-  // Agendamentos = leads na etapa "Consulta agendada" ou similares (30d)
-  const agendStage = funilRows.find(r => r.stage_name && r.stage_name.toLowerCase().includes('agend'));
-  const agend30 = agendStage ? (+agendStage.leads_ult_30d||0) : 0;
+
+  // Pipeline selector — define BEFORE using cm2 for agend filter
+  const pipelines = [...new Map(funilRows.map(r=>[r.pipeline_id,{id:r.pipeline_id,name:r.pipeline_name,main:r.is_main}])).values()];
+  const sel = document.getElementById('pipelineSelect');
+  sel.innerHTML = pipelines.map(p=>`<option value="${p.id}">${p.name}${p.main?' ★':''}</option>`).join('');
+  const cm2 = pipelines.find(p => p.name && p.name.toLowerCase().includes('cm2'));
+  const mainPipeline = cm2 || pipelines.find(p=>p.main) || pipelines[0];
+  if (mainPipeline) sel.value = mainPipeline.id;
+
+  // Agendamentos = do pipeline selecionado (CM2-Consultas), não de todos
+  const selectedPid = mainPipeline ? mainPipeline.id : null;
+  const cm2Rows = selectedPid ? funilRows.filter(r => r.pipeline_id === selectedPid) : funilRows;
+  const agendStage = cm2Rows.find(r => r.stage_name && r.stage_name.toLowerCase().includes('agend'));
+  const agend30    = agendStage ? (+agendStage.leads_ult_30d||0) : 0;
   const agendTotal = agendStage ? (+agendStage.lead_count||0) : 0;
-  const taxaAgend = novos30 > 0 ? (agend30/novos30*100).toFixed(1) : 0;
+  const novos30cm2 = cm2Rows.reduce((s,r)=>s+(+r.leads_ult_30d||0),0);
+  const taxaAgend  = novos30cm2 > 0 ? (agend30/novos30cm2*100).toFixed(1) : 0;
 
   document.getElementById('f-ativos').textContent = fmt.int(allLeads);
   document.getElementById('f-novos30').textContent = fmt.int(novos30);
   document.getElementById('f-taxa').textContent = fmt.int(agend30) + (agendTotal > agend30 ? ` (${fmt.int(agendTotal)} total)` : '');
   const subEl = document.getElementById('f-taxa-sub');
-  if (subEl) subEl.textContent = taxaAgend > 0 ? `${taxaAgend}% dos leads novos` : 'dos leads novos';
+  if (subEl) subEl.textContent = taxaAgend > 0 ? `${taxaAgend}% → consulta agendada` : 'leads → consulta agendada';
   document.getElementById('f-pipeline-val').textContent = fmt.brl(pipeVal);
-
-  // Pipeline selector
-  const pipelines = [...new Map(funilRows.map(r=>[r.pipeline_id,{id:r.pipeline_id,name:r.pipeline_name,main:r.is_main}])).values()];
-  const sel = document.getElementById('pipelineSelect');
-  sel.innerHTML = pipelines.map(p=>`<option value="${p.id}">${p.name}${p.main?' ★':''}</option>`).join('');
-  // Preferir CM2-CONSULTAS > pipeline marcado como main > primeiro
-  const cm2 = pipelines.find(p => p.name && p.name.toLowerCase().includes('cm2'));
-  const mainPipeline = cm2 || pipelines.find(p=>p.main) || pipelines[0];
-  if (mainPipeline) sel.value = mainPipeline.id;
 
   renderFunil();
 
   // Cidades
   const ctbody = document.getElementById('cidade-tbody');
   ctbody.innerHTML = cidades.map(c => {
-    const wpct = c.taxa_win_pct != null ? (+c.taxa_win_pct).toFixed(1)+'%' : '0,0%';
-    const barW = Math.min(100, (+c.taxa_win_pct||0));
+    const wpctNum = isFinite(+c.taxa_win_pct) ? +c.taxa_win_pct : 0;
+    const wpct = wpctNum > 0 ? wpctNum.toFixed(1)+'%' : '—';
+    const barW = Math.min(100, wpctNum);
     return `<tr>
       <td>${c.cidade||'—'}</td>
       <td>${fmt.int(c.leads_total)}</td>
