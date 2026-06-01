@@ -453,8 +453,9 @@ label.check input{accent-color:var(--accent)}
       <div class="kpi-value" id="f-novos30">—</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-header"><div class="kpi-label">Taxa Win</div><div class="kpi-icon orange">🏆</div></div>
+      <div class="kpi-header"><div class="kpi-label">Agendamentos 30d</div><div class="kpi-icon orange">📅</div></div>
       <div class="kpi-value" id="f-taxa">—</div>
+      <div class="kpi-sub" id="f-taxa-sub">% de novos leads</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-header"><div class="kpi-label">Pipeline Value</div><div class="kpi-icon purple">💲</div></div>
@@ -690,6 +691,18 @@ label.check input{accent-color:var(--accent)}
       </tbody>
     </table>
   </div>
+
+  <!-- Gráfico evolução de leads por origem -->
+  <div class="chart-card" style="margin-top:24px">
+    <div class="chart-header">
+      <div class="chart-eyebrow">EVOLUÇÃO</div>
+      <div class="chart-title">Leads por Origem ao longo do tempo</div>
+    </div>
+    <canvas id="kommo-evolution-chart" height="120"></canvas>
+    <div id="kommo-evolution-empty" style="text-align:center;padding:40px;color:var(--muted);display:none">
+      Sem dados suficientes para o gráfico no período selecionado
+    </div>
+  </div>
 </div>
 
 <script>
@@ -828,10 +841,11 @@ async function loadGeral() {
   const { from, to, label } = dateRange(state.geral.days);
   document.getElementById('geral-label').textContent = 'RESUMO ' + label.toUpperCase();
 
-  const [kpis, roas, totais] = await Promise.all([
+  const [kpis, roas, totais, kommoValor] = await Promise.all([
     sb('vw_kpis_overview', `select=categoria,spend,cliques_wa,initiate_checkouts,leads_total&date=gte.${from}&date=lte.${to}`),
     sb('vw_roas_unificado', `select=date,spend,receita_info,receita_consultas,receita_total&date=gte.${from}&date=lte.${to}`),
-    sb('vw_totais_por_dia', `select=date,vendas_total,receita_total&date=gte.${from}&date=lte.${to}`)
+    sb('vw_totais_por_dia', `select=date,vendas_total,receita_total&date=gte.${from}&date=lte.${to}`),
+    sb('vw_kommo_by_source', `select=valor_fechado&date=gte.${from}&date=lte.${to}`)
   ]);
 
   const totalSpend = kpis.reduce((s, r) => s + (+r.spend||0), 0);
@@ -839,7 +853,9 @@ async function loadGeral() {
   const totalReceita = totais.reduce((s, r) => s + (+r.receita_total||0), 0);
   const totalCliquesWA = kpis.filter(r=>r.categoria!=='infoproduto').reduce((s,r)=>s+(+r.cliques_wa||0),0);
   const totalReceita_info = roas.reduce((s,r)=>s+(+r.receita_info||0),0);
-  const totalReceita_cons = roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
+  // Receita consultas: usa Kommo valor_fechado (mais preciso que vw_roas_unificado)
+  const kommoReceitaCons = (kommoValor||[]).reduce((s,r)=>s+(+r.valor_fechado||0),0);
+  const totalReceita_cons = kommoReceitaCons > 0 ? kommoReceitaCons : roas.reduce((s,r)=>s+(+r.receita_consultas||0),0);
   const totalRoas = totalSpend > 0 ? (totalReceita_info + totalReceita_cons) / totalSpend : 0;
   const roasInfo = totalSpend > 0 ? totalReceita_info / totalSpend : 0;
   const roasCons = totalSpend > 0 ? totalReceita_cons / totalSpend : 0;
@@ -1089,13 +1105,18 @@ async function loadFunil() {
   // KPIs from all main pipelines
   const allLeads = funilRows.reduce((s,r)=>s+(+r.lead_count||0),0);
   const novos30  = funilRows.reduce((s,r)=>s+(+r.leads_ult_30d||0),0);
-  const won      = funilRows.filter(r=>r.is_won).reduce((s,r)=>s+(+r.lead_count||0),0);
   const pipeVal  = funilRows.reduce((s,r)=>s+(+r.pipeline_value_brl||0),0);
-  const taxaWin  = allLeads > 0 ? (won/allLeads)*100 : 0;
+  // Agendamentos = leads na etapa "Consulta agendada" ou similares (30d)
+  const agendStage = funilRows.find(r => r.stage_name && r.stage_name.toLowerCase().includes('agend'));
+  const agend30 = agendStage ? (+agendStage.leads_ult_30d||0) : 0;
+  const agendTotal = agendStage ? (+agendStage.lead_count||0) : 0;
+  const taxaAgend = novos30 > 0 ? (agend30/novos30*100).toFixed(1) : 0;
 
   document.getElementById('f-ativos').textContent = fmt.int(allLeads);
   document.getElementById('f-novos30').textContent = fmt.int(novos30);
-  document.getElementById('f-taxa').textContent = fmt.pct(taxaWin);
+  document.getElementById('f-taxa').textContent = fmt.int(agend30) + (agendTotal > agend30 ? ` (${fmt.int(agendTotal)} total)` : '');
+  const subEl = document.getElementById('f-taxa-sub');
+  if (subEl) subEl.textContent = taxaAgend > 0 ? `${taxaAgend}% dos leads novos` : 'dos leads novos';
   document.getElementById('f-pipeline-val').textContent = fmt.brl(pipeVal);
 
   // Pipeline selector
@@ -1509,10 +1530,72 @@ async function loadKommoBySource() {
         <td style="padding:12px 16px;text-align:right;color:var(--green,#22c55e);font-weight:600">${valor}</td>
       </tr>`;
     }).join('');
+
+    // ── Gráfico de evolução por origem ──────────────────────────────────────────
+    renderKommoEvolutionChart(rows);
+
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Erro ao carregar — execute a migração SQL primeiro</td></tr>`;
     console.error('loadKommoBySource:', e);
   }
+}
+
+let _kommoEvChart = null;
+function renderKommoEvolutionChart(rows) {
+  const canvas = document.getElementById('kommo-evolution-chart');
+  const empty  = document.getElementById('kommo-evolution-empty');
+  if (!canvas) return;
+
+  // Agrupar por data e source
+  const byDate = {};
+  const sourcesSet = new Set();
+  rows.forEach(r => {
+    const d = r.date;
+    const s = r.source || 'direto';
+    if (s === 'meta_ads_ctwa') return; // skip CTWA broken placeholder for chart clarity
+    if (!byDate[d]) byDate[d] = {};
+    byDate[d][s] = (byDate[d][s] || 0) + (+r.leads || 0);
+    sourcesSet.add(s);
+  });
+
+  const dates = Object.keys(byDate).sort();
+  if (dates.length < 2) {
+    canvas.style.display = 'none';
+    empty.style.display = '';
+    return;
+  }
+  canvas.style.display = '';
+  empty.style.display = 'none';
+
+  const sourceColors = {
+    direto: '#94a3b8', google: '#3b82f6', google_ads: '#2563eb',
+    instagram: '#e1306c', instagram_bio: '#c13584',
+    tiktok: '#010101', tiktok_bio: '#69C9D0',
+    meta_ads: '#1877f2', whatsapp: '#25d366'
+  };
+  const sources = [...sourcesSet].sort();
+
+  const datasets = sources.map(s => ({
+    label: ORG_LABELS[s] || s,
+    data: dates.map(d => byDate[d][s] || 0),
+    borderColor: sourceColors[s] || '#6366f1',
+    backgroundColor: (sourceColors[s] || '#6366f1') + '22',
+    fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2
+  }));
+
+  if (_kommoEvChart) _kommoEvChart.destroy();
+  _kommoEvChart = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: { labels: dates.map(d => d.slice(5)), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }, tooltip: { mode: 'index' } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { beginAtZero: true, ticks: { precision: 0, font: { size: 10 } } }
+      }
+    }
+  });
 }
 
 async function syncOrganic() {
