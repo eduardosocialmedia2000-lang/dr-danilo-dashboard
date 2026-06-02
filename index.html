@@ -330,7 +330,9 @@ label.check input{accent-color:var(--accent)}
     </div>
   </div>
   <div class="info-banner">ℹ️ Vendas anteriores à integração com o tracking não estão atribuídas aos anúncios. Vendas novas serão automaticamente linkadas pelo ad_id.</div>
-  <div class="kpi-grid">
+  <!-- Primárias -->
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px">Métricas Principais</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
     <div class="kpi-card">
       <div class="kpi-header"><div class="kpi-label">Investimento</div><div class="kpi-icon orange">💲</div></div>
       <div class="kpi-value" id="i-invest">—</div>
@@ -341,12 +343,63 @@ label.check input{accent-color:var(--accent)}
       <div class="kpi-delta" id="i-vendas-sub"></div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-header"><div class="kpi-label">Retorno</div><div class="kpi-icon blue">📈</div></div>
+      <div class="kpi-header"><div class="kpi-label">ROAS</div><div class="kpi-icon blue">📈</div></div>
       <div class="kpi-value" id="i-roas">—</div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-header"><div class="kpi-label">Custo por Venda</div><div class="kpi-icon purple">🎯</div></div>
+    <div class="kpi-card" style="border-left:3px solid var(--accent)">
+      <div class="kpi-header"><div class="kpi-label">CAC</div><div class="kpi-icon purple">🎯</div></div>
       <div class="kpi-value" id="i-cpa">—</div>
+      <div class="kpi-sub">Custo de aquisição de cliente</div>
+    </div>
+  </div>
+
+  <!-- Secundárias -->
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:20px 0 8px">Métricas Secundárias</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">CTR</div><div class="kpi-icon blue">🖱️</div></div>
+      <div class="kpi-value" style="font-size:22px" id="i-ctr">—</div>
+      <div class="kpi-sub">Taxa de clique nos anúncios</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">Conv. Página</div><div class="kpi-icon green">📄</div></div>
+      <div class="kpi-value" style="font-size:22px" id="i-conv-page">—</div>
+      <div class="kpi-sub">Cliques → InitiateCheckout</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">Connect Rate</div><div class="kpi-icon orange">🔗</div></div>
+      <div class="kpi-value" style="font-size:22px" id="i-connect-rate">—</div>
+      <div class="kpi-sub">Cliques → Compra (end-to-end)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">Conv. Checkout</div><div class="kpi-icon purple">🛒</div></div>
+      <div class="kpi-value" style="font-size:22px" id="i-conv-checkout">—</div>
+      <div class="kpi-sub">IC → Compra finalizada</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">Custo por IC</div><div class="kpi-icon orange">💰</div></div>
+      <div class="kpi-value" style="font-size:22px" id="i-cost-ic">—</div>
+      <div class="kpi-sub">Custo de Initiate Checkout</div>
+    </div>
+  </div>
+
+  <!-- Terciárias -->
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:20px 0 8px">Métricas Terciárias</div>
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">CPM</div><div class="kpi-icon blue">👁️</div></div>
+      <div class="kpi-value" style="font-size:20px" id="i-cpm">—</div>
+      <div class="kpi-sub">Custo por 1.000 impressões</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">CPC</div><div class="kpi-icon green">🖱️</div></div>
+      <div class="kpi-value" style="font-size:20px" id="i-cpc">—</div>
+      <div class="kpi-sub">Custo por clique no link</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">Scroll Rate</div><div class="kpi-icon purple">📜</div></div>
+      <div class="kpi-value" style="font-size:20px" id="i-scroll">—</div>
+      <div class="kpi-sub">Retenção vídeo 75%+ (proxy)</div>
     </div>
   </div>
   <div class="table-card">
@@ -360,13 +413,19 @@ label.check input{accent-color:var(--accent)}
     </div>
     <div class="table-wrap"><table id="info-table">
       <thead><tr>
-        <th style="width:260px">Anúncio</th>
-        <th onclick="sortTable('info-table',1)">Investimento</th>
+        <th style="width:220px">Anúncio</th>
+        <th onclick="sortTable('info-table',1)">Invest.</th>
         <th onclick="sortTable('info-table',2)">Vendas</th>
-        <th onclick="sortTable('info-table',3)">Faturamento</th>
-        <th onclick="sortTable('info-table',4)" class="sort-desc">Retorno</th>
+        <th onclick="sortTable('info-table',3)" class="sort-desc">ROAS</th>
+        <th onclick="sortTable('info-table',4)">CAC</th>
+        <th onclick="sortTable('info-table',5)">CTR</th>
+        <th onclick="sortTable('info-table',6)">CPC</th>
+        <th onclick="sortTable('info-table',7)">CPM</th>
+        <th onclick="sortTable('info-table',8)">IC</th>
+        <th onclick="sortTable('info-table',9)">Custo IC</th>
+        <th onclick="sortTable('info-table',10)">Conv. Checkout</th>
       </tr></thead>
-      <tbody id="info-tbody"><tr><td colspan="5"><div class="loading"><div class="spinner"></div><br>Carregando...</div></td></tr></tbody>
+      <tbody id="info-tbody"><tr><td colspan="11"><div class="loading"><div class="spinner"></div><br>Carregando...</div></td></tr></tbody>
     </table></div>
     <div class="show-more" id="info-showmore" style="display:none">
       <button class="show-more-btn" onclick="showAll('info-tbody')">Mostrar todos</button>
@@ -1018,32 +1077,88 @@ let infoAllRows = [];
 let infoCurFilter = 'all';
 
 async function loadInfo() {
-  const { from, to } = dateRange(state.info.days, true);  // inclui hoje
-  const data = await sb('vw_performance_by_ad_fix',
-    `select=ad_id,ad_name,campaign_name,spend,vendas_count_fix,receita_fix,effective_status,thumbnail_url,image_url&or=(campaign_name.ilike.%25INFO%25,campaign_name.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`);
+  const { from, to } = dateRange(state.info.days, true);
 
-  // Aggregate by ad_id
+  // Busca dados de performance com todas as métricas necessárias
+  const [fix, perf] = await Promise.all([
+    sb('vw_performance_by_ad_fix',
+      `select=ad_id,ad_name,campaign_name,spend,vendas_count_fix,receita_fix,effective_status,thumbnail_url,image_url&or=(campaign_name.ilike.%25INFO%25,campaign_name.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`),
+    sb('vw_performance_by_ad',
+      `select=ad_id,spend,ctr,cpm,cpc,link_clicks,initiate_checkout,purchase_meta,impressions,video_p75,thruplays&or=(campaign_name.ilike.%25INFO%25,campaign_name.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`)
+  ]);
+
+  // Merge fix + perf por ad_id
+  const perfMap = {};
+  perf.forEach(r => {
+    if (!perfMap[r.ad_id]) perfMap[r.ad_id] = {clicks:0,ic:0,purchase_meta:0,impressions:0,video_p75:0,thruplays:0,spend_perf:0};
+    perfMap[r.ad_id].clicks       += +r.link_clicks||0;
+    perfMap[r.ad_id].ic           += +r.initiate_checkout||0;
+    perfMap[r.ad_id].purchase_meta+= +r.purchase_meta||0;
+    perfMap[r.ad_id].impressions  += +r.impressions||0;
+    perfMap[r.ad_id].video_p75    += +r.video_p75||0;
+    perfMap[r.ad_id].thruplays    += +r.thruplays||0;
+    perfMap[r.ad_id].spend_perf   += +r.spend||0;
+  });
+
   const byAd = {};
-  data.forEach(r => {
+  fix.forEach(r => {
     if (!byAd[r.ad_id]) byAd[r.ad_id] = { ...r, spend:0, vendas:0, receita:0 };
     byAd[r.ad_id].spend   += +r.spend||0;
     byAd[r.ad_id].vendas  += +r.vendas_count_fix||0;
     byAd[r.ad_id].receita += +r.receita_fix||0;
+    // Merge perf
+    const p = perfMap[r.ad_id] || {};
+    byAd[r.ad_id].clicks       = (byAd[r.ad_id].clicks||0)       + (p.clicks||0);
+    byAd[r.ad_id].ic           = (byAd[r.ad_id].ic||0)           + (p.ic||0);
+    byAd[r.ad_id].purchase_meta= (byAd[r.ad_id].purchase_meta||0)+ (p.purchase_meta||0);
+    byAd[r.ad_id].impressions  = (byAd[r.ad_id].impressions||0)  + (p.impressions||0);
+    byAd[r.ad_id].video_p75    = (byAd[r.ad_id].video_p75||0)    + (p.video_p75||0);
+    byAd[r.ad_id].thruplays    = (byAd[r.ad_id].thruplays||0)    + (p.thruplays||0);
   });
 
   infoAllRows = Object.values(byAd).sort((a,b) => b.receita/Math.max(b.spend,.01) - a.receita/Math.max(a.spend,.01));
-  const totalSpend = infoAllRows.reduce((s,r)=>s+(r.spend||0),0);
-  const totalVendas = infoAllRows.reduce((s,r)=>s+(r.vendas||0),0);
-  const totalReceita = infoAllRows.reduce((s,r)=>s+(r.receita||0),0);
-  const roas = totalSpend > 0 ? totalReceita/totalSpend : 0;
-  const cpa = totalVendas > 0 ? totalSpend/totalVendas : 0;
 
+  // Totais
+  const totalSpend    = infoAllRows.reduce((s,r)=>s+(r.spend||0),0);
+  const totalVendas   = infoAllRows.reduce((s,r)=>s+(r.vendas||0),0);
+  const totalReceita  = infoAllRows.reduce((s,r)=>s+(r.receita||0),0);
+  const totalClicks   = infoAllRows.reduce((s,r)=>s+(r.clicks||0),0);
+  const totalIC       = infoAllRows.reduce((s,r)=>s+(r.ic||0),0);
+  const totalPurchMeta= infoAllRows.reduce((s,r)=>s+(r.purchase_meta||0),0);
+  const totalImpr     = infoAllRows.reduce((s,r)=>s+(r.impressions||0),0);
+  const totalVid75    = infoAllRows.reduce((s,r)=>s+(r.video_p75||0),0);
+
+  // Cálculos
+  const roas         = totalSpend > 0 ? totalReceita/totalSpend : 0;
+  const cac          = totalVendas > 0 ? totalSpend/totalVendas : 0;
+  const ctr          = totalImpr > 0 ? (totalClicks/totalImpr*100) : 0;
+  const convPage     = totalClicks > 0 ? (totalIC/totalClicks*100) : 0;
+  const connectRate  = totalClicks > 0 ? (totalPurchMeta/totalClicks*100) : 0;
+  const convCheckout = totalIC > 0 ? (totalPurchMeta/totalIC*100) : 0;
+  const costIC       = totalIC > 0 ? totalSpend/totalIC : 0;
+  const cpm          = totalImpr > 0 ? (totalSpend/totalImpr*1000) : 0;
+  const cpc          = totalClicks > 0 ? totalSpend/totalClicks : 0;
+  const scrollRate   = totalImpr > 0 ? (totalVid75/totalImpr*100) : 0;
+
+  // KPIs primárias
   document.getElementById('i-invest').textContent = fmt.brl(totalSpend);
   document.getElementById('i-vendas').textContent = totalVendas + ' • ' + fmt.brl(totalReceita);
   const rEl = document.getElementById('i-roas');
   rEl.textContent = fmt.x(roas);
   rEl.className = 'kpi-value roas-' + roasClass(roas);
-  document.getElementById('i-cpa').textContent = fmt.brl(cpa);
+  document.getElementById('i-cpa').textContent = cac > 0 ? fmt.brl(cac) : '—';
+
+  // KPIs secundárias
+  document.getElementById('i-ctr').textContent        = ctr > 0 ? ctr.toFixed(2)+'%' : '—';
+  document.getElementById('i-conv-page').textContent   = convPage > 0 ? convPage.toFixed(1)+'%' : '—';
+  document.getElementById('i-connect-rate').textContent= connectRate > 0 ? connectRate.toFixed(2)+'%' : '—';
+  document.getElementById('i-conv-checkout').textContent= convCheckout > 0 ? convCheckout.toFixed(1)+'%' : '—';
+  document.getElementById('i-cost-ic').textContent     = costIC > 0 ? fmt.brl(costIC) : '—';
+
+  // KPIs terciárias
+  document.getElementById('i-cpm').textContent    = cpm > 0 ? fmt.brl(cpm) : '—';
+  document.getElementById('i-cpc').textContent    = cpc > 0 ? fmt.brl(cpc) : '—';
+  document.getElementById('i-scroll').textContent = scrollRate > 0 ? scrollRate.toFixed(1)+'%' : '—';
 
   renderInfoTable();
 }
@@ -1075,8 +1190,14 @@ function renderInfoTable() {
       </div></td>
       <td>${fmt.brl(r.spend)}</td>
       <td>${r.vendas||0}</td>
-      <td>${fmt.brl(r.receita)}</td>
       <td><span class="roas-cell ${rc}">${fmt.x(roas)}</span></td>
+      <td>${r.vendas > 0 ? fmt.brl(r.spend/r.vendas) : '—'}</td>
+      <td>${r.impressions > 0 ? (r.clicks/r.impressions*100).toFixed(2)+'%' : '—'}</td>
+      <td>${r.clicks > 0 ? fmt.brl(r.spend/r.clicks) : '—'}</td>
+      <td>${r.impressions > 0 ? fmt.brl(r.spend/r.impressions*1000) : '—'}</td>
+      <td>${fmt.int(r.ic||0)}</td>
+      <td>${(r.ic||0) > 0 ? fmt.brl(r.spend/(r.ic||1)) : '—'}</td>
+      <td>${(r.ic||0) > 0 ? ((r.vendas||0)/(r.ic||1)*100).toFixed(1)+'%' : '—'}</td>
     </tr>`;
   }).join('');
   document.getElementById('info-showmore').style.display = rows.length > 20 ? '' : 'none';
