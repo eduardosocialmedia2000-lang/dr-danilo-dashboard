@@ -1483,9 +1483,11 @@ function renderFunilChart(data) {
 async function loadStudio() {
   const { cat, days, sort, status } = state.studio;
   const { from, to } = dateRange(days, true);  // inclui hoje
+  // Infoproduto = campanhas INFO + BIDCAP (ambas vendem o infoproduto na Kiwify).
+  // BIDCAP vem com categoria='outros' na view, por isso filtramos por nome (mesmo critério da receita _fix).
   const catFilter = cat === 'consultas'
     ? 'and=(campaign_name.not.ilike.%25INFO%25,campaign_name.not.ilike.%25BIDCAP%25)'
-    : `categoria=eq.${cat}`;
+    : 'or=(campaign_name.ilike.%25INFO%25,campaign_name.ilike.%25BIDCAP%25)';
   // Usa vw_performance_by_ad_fix para receita/vendas (atribuição por dia, não cumulativa)
   // + vw_performance_by_ad para metadados (ad_title, ad_body, categoria, etc.)
   const [metaData, fixData] = await Promise.all([
