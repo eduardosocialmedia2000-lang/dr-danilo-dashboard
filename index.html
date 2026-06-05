@@ -2135,12 +2135,16 @@ const WPP_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const wppSb = supabase.createClient(WPP_SB_URL, WPP_SB_KEY);
 
 const WPP_SRC = {
+  // Sources do Kommo (vw_kommo_by_source)
+  meta_ads_ctwa:     { label: 'Meta Ads (CTWA)',  color: '#1877f2' },
+  google:            { label: 'Google Ads',        color: '#34a853' },
+  instagram:         { label: 'Instagram',         color: '#e1306c' },
+  tiktok:            { label: 'TikTok',            color: '#69c9d0' },
+  direto:            { label: 'Direto',            color: '#9ca3af' },
+  // Aliases legados (compatibilidade)
   meta_ads:          { label: 'Meta Ads',         color: '#1877f2' },
   google_ads:        { label: 'Google Ads',        color: '#34a853' },
-  instagram_bio_sp:  { label: 'Instagram Bio SP',  color: '#e1306c' },
-  instagram_bio_gyn: { label: 'Instagram Bio GYN', color: '#c13584' },
   youtube:           { label: 'YouTube',           color: '#ff0000' },
-  tiktok:            { label: 'TikTok',            color: '#69c9d0' },
   website:           { label: 'Site',              color: '#6366f1' },
   organic_direct:    { label: 'Orgânico Direto',   color: '#9ca3af' },
 };
@@ -2170,23 +2174,26 @@ async function loadWppLeads() {
   const body = document.getElementById('wpp-leads-body');
   if (!body) return;
 
-  let q = wppSb.from('whatsapp_leads').select('source,created_at,consulta_agendada_at,consulta_value');
-  const from = wppDateFrom(wppDays);
-  if (from) q = q.gte('created_at', from);
+  // Fonte: vw_kommo_by_source (1º Supabase, já agregada por date+source).
+  // leads = total de leads; fechados = agendaram consulta; valor_fechado = valor.
+  let filtro = '';
+  const fromIso = wppDateFrom(wppDays);
+  if (fromIso) filtro = `&date=gte.${fromIso.slice(0,10)}`;
+  let data;
+  try {
+    data = await sb('vw_kommo_by_source', `select=source,leads,fechados,valor_fechado${filtro}`);
+  } catch (e) {
+    body.innerHTML = `<div class="empty">Erro ao carregar: ${e.message}</div>`; return;
+  }
 
-  const { data, error } = await q;
-  if (error) { body.innerHTML = `<div class="empty">Erro ao carregar: ${error.message}</div>`; return; }
-
-  // Agrupa por source
+  // Agrupa por source (a view já vem por dia, somamos por canal)
   const map = {};
   for (const row of (data || [])) {
     const src = row.source || 'organic_direct';
     if (!map[src]) map[src] = { total: 0, agendou: 0, valor: 0 };
-    map[src].total++;
-    if (row.consulta_agendada_at) {
-      map[src].agendou++;
-      map[src].valor += Number(row.consulta_value) || 0;
-    }
+    map[src].total  += Number(row.leads) || 0;
+    map[src].agendou+= Number(row.fechados) || 0;
+    map[src].valor  += Number(row.valor_fechado) || 0;
   }
 
   const rows = Object.entries(map).sort((a,b) => b[1].total - a[1].total);
@@ -2244,15 +2251,16 @@ document.getElementById('wpp-period-btns').addEventListener('click', e => {
 });
 
 async function loadConsultasMensal() {
-  const { data, error } = await wppSb
-    .from('whatsapp_leads')
-    .select('source,consulta_agendada_at,consulta_value')
-    .not('consulta_agendada_at', 'is', null);
-
   const valDiv = document.getElementById('consultas-mensal-val');
   if (!valDiv) return;
 
-  if (error || !data?.length) {
+  // Fonte: vw_kommo_by_source (consultas agendadas = fechados>0, por date+source)
+  let data;
+  try {
+    data = await sb('vw_kommo_by_source', `select=date,source,fechados,valor_fechado&fechados=gt.0`);
+  } catch (e) { data = null; }
+
+  if (!data?.length) {
     if (state.chartConsultasMensal) { state.chartConsultasMensal.destroy(); state.chartConsultasMensal = null; }
     valDiv.innerHTML = `<div style="color:var(--muted);font-size:13px">Nenhuma consulta agendada ainda.</div>`;
     return;
@@ -2270,15 +2278,15 @@ async function loadConsultasMensal() {
   const sourceSet = new Set();
   const monthMap = {};
   for (const row of data) {
-    const d = new Date(row.consulta_agendada_at);
+    const d = new Date(row.date + 'T00:00:00');
     const label = d.toLocaleDateString('pt-BR', {month:'short', year:'2-digit'});
     if (!months.includes(label)) continue;
-    const src = row.source || 'organic_direct';
+    const src = row.source || 'direto';
     sourceSet.add(src);
     if (!monthMap[label]) monthMap[label] = {};
     if (!monthMap[label][src]) monthMap[label][src] = { count: 0, valor: 0 };
-    monthMap[label][src].count++;
-    monthMap[label][src].valor += Number(row.consulta_value) || 0;
+    monthMap[label][src].count += Number(row.fechados) || 0;
+    monthMap[label][src].valor += Number(row.valor_fechado) || 0;
   }
 
   const sources = [...sourceSet].sort((a, b) => {
