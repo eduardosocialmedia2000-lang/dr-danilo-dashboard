@@ -816,7 +816,6 @@ label.check input{accent-color:var(--accent)}
       <span style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px">📸 /consulta-ig → Instagram</span>
       <span style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px">🎵 /consulta-ttk → TikTok</span>
       <span style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px">▶️ /consulta-yt → YouTube</span>
-      <span style="background:rgba(255,0,0,.1);border:1px dashed rgba(255,0,0,.3);border-radius:8px;padding:4px 12px;font-family:monospace;font-size:12px;color:#ef4444">❌ /consulta-wa → WhatsApp Status (criar)</span>
     </div>
   </div>
 
@@ -1721,7 +1720,8 @@ setInterval(reloadActiveTab, 60 * 1000);
 
 // ─── ORGÂNICO ────────────────────────────────────────────────────────────────
 const ORG_LABELS = {
-  youtube: 'YouTube',
+  youtube:      'YouTube (Consulta)',
+  youtube_info: 'YouTube (Infoproduto)',
   google: 'Google Orgânico',
   '(direct)': 'Direto',
   direct: 'Direto',
@@ -2130,23 +2130,22 @@ function copyBriefing() {
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeBriefing(); });
 
 // ─── WPP LEADS POR CANAL ─────────────────────────────────────────────────────
-const WPP_SB_URL = 'https://dsopqujavpddgnnxugkw.supabase.co';
-const WPP_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRzb3BxdWphdnBkZGdubnh1Z2t3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NjYxODgsImV4cCI6MjA5NTA0MjE4OH0.u1DrNaQ4lmE5vLPQ1nSCrDRsC3aQkHoYG3OSSarGjp4';
-const wppSb = supabase.createClient(WPP_SB_URL, WPP_SB_KEY);
+// (2º Supabase 'dsopqujavpddgnnxugkw' foi deletado — blocos migrados para vw_kommo_by_source no 1º Supabase)
 
 const WPP_SRC = {
   // Sources do Kommo (vw_kommo_by_source)
-  meta_ads_ctwa:     { label: 'Meta Ads (CTWA)',  color: '#1877f2' },
-  google:            { label: 'Google Ads',        color: '#34a853' },
-  instagram:         { label: 'Instagram',         color: '#e1306c' },
-  tiktok:            { label: 'TikTok',            color: '#69c9d0' },
-  direto:            { label: 'Direto',            color: '#9ca3af' },
+  meta_ads_ctwa:     { label: 'Meta Ads (CTWA)',       color: '#1877f2' },
+  google:            { label: 'Google Ads',             color: '#34a853' },
+  instagram:         { label: 'Instagram',              color: '#e1306c' },
+  tiktok:            { label: 'TikTok',                 color: '#69c9d0' },
+  direto:            { label: 'Direto',                 color: '#9ca3af' },
+  youtube:           { label: 'YouTube (Consulta)',     color: '#ff0000' },
+  youtube_info:      { label: 'YouTube (Infoproduto)', color: '#cc0000' },
   // Aliases legados (compatibilidade)
-  meta_ads:          { label: 'Meta Ads',         color: '#1877f2' },
-  google_ads:        { label: 'Google Ads',        color: '#34a853' },
-  youtube:           { label: 'YouTube',           color: '#ff0000' },
-  website:           { label: 'Site',              color: '#6366f1' },
-  organic_direct:    { label: 'Orgânico Direto',   color: '#9ca3af' },
+  meta_ads:          { label: 'Meta Ads',               color: '#1877f2' },
+  google_ads:        { label: 'Google Ads',             color: '#34a853' },
+  website:           { label: 'Site',                   color: '#6366f1' },
+  organic_direct:    { label: 'Orgânico Direto',        color: '#9ca3af' },
 };
 
 function wppSourceMeta(src) {
@@ -2154,6 +2153,7 @@ function wppSourceMeta(src) {
   if (WPP_SRC[src]) return WPP_SRC[src];
   if (src.startsWith('lp_google')) return { label: 'Google Ads (LP)', color: '#34a853' };
   if (src.startsWith('lp_youtube') || src.startsWith('lp_yt')) return { label: 'YouTube (LP)', color: '#ff0000' };
+  if (src === 'youtube_info') return { label: 'YouTube (Infoproduto)', color: '#cc0000' };
   if (src.startsWith('lp_instagram')) return { label: 'Instagram (LP)', color: '#e1306c' };
   if (src.startsWith('lp_tiktok')) return { label: 'TikTok (LP)', color: '#69c9d0' };
   return { label: src, color: '#9ca3af' };
