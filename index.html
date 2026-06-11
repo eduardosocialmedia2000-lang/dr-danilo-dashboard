@@ -830,6 +830,74 @@ label.check input{accent-color:var(--accent)}
       Sem dados suficientes para o gráfico no período selecionado
     </div>
   </div>
+
+  <!-- ═══ INFOPRODUTO POR CANAL ═══ -->
+  <div style="margin-top:32px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="width:4px;height:32px;background:var(--accent);border-radius:2px"></div>
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.08em">INFOPRODUTO</div>
+        <div style="font-size:18px;font-weight:700">Vendas por Canal Orgânico</div>
+      </div>
+    </div>
+
+    <!-- KPIs infoproduto orgânico -->
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:20px">
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Total Vendas</span><div class="kpi-icon green">🛒</div></div>
+        <div class="kpi-value" id="info-org-total-vendas">—</div>
+        <div class="kpi-sub">Vendas Kiwify no período</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Receita Total</span><div class="kpi-icon orange">💰</div></div>
+        <div class="kpi-value" id="info-org-total-receita">—</div>
+        <div class="kpi-sub">Faturamento Kiwify</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Ticket Médio</span><div class="kpi-icon blue">🎯</div></div>
+        <div class="kpi-value" id="info-org-ticket">—</div>
+        <div class="kpi-sub">Receita ÷ Vendas</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-header"><span class="kpi-label">Melhor Canal</span><div class="kpi-icon purple">🏆</div></div>
+        <div class="kpi-value" style="font-size:16px;margin-top:4px" id="info-org-best-canal">—</div>
+        <div class="kpi-sub" id="info-org-best-receita">— receita</div>
+      </div>
+    </div>
+
+    <!-- Tabela vendas por canal -->
+    <div class="table-card">
+      <div class="table-toolbar">
+        <span style="font-weight:700;font-size:14px">🛍️ Vendas por Canal</span>
+        <span style="color:var(--muted);font-size:12px;margin-left:8px">Kiwify • atribuição por utm_source</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:var(--bg)">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Canal</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Vendas</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Receita</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Ticket Médio</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted)">Participação</th>
+          </tr>
+        </thead>
+        <tbody id="info-org-tbody">
+          <tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Carregando vendas por canal...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Link do YouTube -->
+    <div style="background:rgba(255,0,0,.06);border:1px solid rgba(255,0,0,.15);border-radius:12px;padding:14px 16px;margin-top:14px;font-size:13px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">▶️</span>
+      <div>
+        <span style="font-weight:700">YouTube (Infoproduto):</span>
+        <span style="color:var(--muted);margin-left:6px">Link rastreado:</span>
+        <code style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;margin-left:6px">lp.drdanilomatsunaga.com/info-yt</code>
+        <span style="color:var(--muted);font-size:11px;margin-left:6px">→ utm_source=youtube_info</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1719,6 +1787,19 @@ sbClient.channel('dashboard-realtime')
 setInterval(reloadActiveTab, 60 * 1000);
 
 // ─── ORGÂNICO ────────────────────────────────────────────────────────────────
+// Labels das fontes de venda (vw_vendas_por_fonte)
+const INFO_FONTE_LABELS = {
+  'Meta Ads':         { label: 'Meta Ads',               color: '#1877f2', icon: '📘' },
+  'Direto / Orgânico':{ label: 'Direto / Orgânico',      color: '#9ca3af', icon: '🔗' },
+  'ManyChat':         { label: 'ManyChat',                color: '#f97316', icon: '🤖' },
+  'Bio Instagram':    { label: 'Instagram Bio',           color: '#e1306c', icon: '📸' },
+  'YouTube':          { label: 'YouTube (Consulta)',      color: '#ff0000', icon: '▶️' },
+  'YouTube Info':     { label: 'YouTube (Infoproduto)',   color: '#cc0000', icon: '▶️' },
+  'youtube_info':     { label: 'YouTube (Infoproduto)',   color: '#cc0000', icon: '▶️' },
+  'TikTok':           { label: 'TikTok Bio',              color: '#69c9d0', icon: '🎵' },
+  'Google Ads':       { label: 'Google Ads',              color: '#34a853', icon: '🔍' },
+};
+
 const ORG_LABELS = {
   youtube:      'YouTube (Consulta)',
   youtube_info: 'YouTube (Infoproduto)',
@@ -1984,6 +2065,7 @@ async function loadOrganico() {
   if (!sorted.length) {
     tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Aguardando primeiros dados do GA4...</td></tr>';
     loadKommoBySource();  // carrega mesmo sem GA4
+    loadInfoOrganico();   // carrega vendas infoproduto por canal
     return;
   }
   const maxClicks = Math.max(...sorted.map(([, d]) => d.wa_clicks), 1);
@@ -2001,6 +2083,84 @@ async function loadOrganico() {
   }).join('');
   markSynced();
   loadKommoBySource();  // carrega leads por origem do Kommo
+  loadInfoOrganico();   // carrega vendas infoproduto por canal
+}
+
+// ─── INFOPRODUTO POR CANAL (vw_vendas_por_fonte) ─────────────────────────────
+async function loadInfoOrganico() {
+  const { from, to } = dateRange(state.organico.days, true);
+  const tbody = document.getElementById('info-org-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Carregando...</td></tr>';
+
+  try {
+    const rows = await sb('vw_vendas_por_fonte',
+      `select=fonte,vendas,receita&date=gte.${from}&date=lte.${to}`);
+
+    // Agrega por fonte
+    const byFonte = {};
+    (rows || []).forEach(r => {
+      const k = r.fonte || 'Desconhecido';
+      if (!byFonte[k]) byFonte[k] = { vendas: 0, receita: 0 };
+      byFonte[k].vendas  += +r.vendas  || 0;
+      byFonte[k].receita += +r.receita || 0;
+    });
+
+    const sorted = Object.entries(byFonte).sort((a, b) => b[1].receita - a[1].receita);
+    const totalVendas  = sorted.reduce((s, [, d]) => s + d.vendas,  0);
+    const totalReceita = sorted.reduce((s, [, d]) => s + d.receita, 0);
+    const ticket = totalVendas > 0 ? totalReceita / totalVendas : 0;
+
+    // KPIs
+    const elV = document.getElementById('info-org-total-vendas');
+    const elR = document.getElementById('info-org-total-receita');
+    const elT = document.getElementById('info-org-ticket');
+    const elB = document.getElementById('info-org-best-canal');
+    const elBR= document.getElementById('info-org-best-receita');
+    if (elV) elV.textContent = fmt.int(totalVendas)  || '0';
+    if (elR) elR.textContent = 'R$' + fmt.money(totalReceita);
+    if (elT) elT.textContent = 'R$' + fmt.money(ticket);
+    if (sorted.length && elB) {
+      const best = sorted[0];
+      const meta = INFO_FONTE_LABELS[best[0]] || { label: best[0], icon: '📦' };
+      elB.textContent = meta.icon + ' ' + meta.label;
+      if (elBR) elBR.textContent = 'R$' + fmt.money(best[1].receita) + ' receita';
+    }
+
+    if (!sorted.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Nenhuma venda no período selecionado</td></tr>';
+      return;
+    }
+
+    const maxReceita = Math.max(...sorted.map(([, d]) => d.receita), 1);
+    tbody.innerHTML = sorted.map(([fonte, d]) => {
+      const meta   = INFO_FONTE_LABELS[fonte] || { label: fonte, color: '#9ca3af', icon: '📦' };
+      const pct    = totalReceita > 0 ? (d.receita / totalReceita * 100).toFixed(1) + '%' : '—';
+      const tk     = d.vendas > 0 ? 'R$' + fmt.money(d.receita / d.vendas) : '—';
+      const barW   = Math.round(d.receita / maxReceita * 100);
+      return `<tr style="border-top:1px solid var(--border)">
+        <td style="padding:12px 16px">
+          <span style="font-size:16px;margin-right:6px">${meta.icon}</span>
+          <span style="font-weight:600">${meta.label}</span>
+        </td>
+        <td style="padding:12px 16px;text-align:right;font-weight:700">${fmt.int(d.vendas)}</td>
+        <td style="padding:12px 16px;text-align:right;font-weight:700;color:var(--accent)">R$${fmt.money(d.receita)}</td>
+        <td style="padding:12px 16px;text-align:right;color:var(--muted)">${tk}</td>
+        <td style="padding:12px 16px;min-width:140px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;background:var(--border);border-radius:4px;height:8px">
+              <div style="background:${meta.color};border-radius:4px;height:8px;width:${barW}%"></div>
+            </div>
+            <span style="font-size:12px;color:var(--muted);width:36px;text-align:right">${pct}</span>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+  } catch(e) {
+    console.error('loadInfoOrganico:', e);
+    if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="padding:40px;text-align:center;color:var(--muted)">Erro ao carregar dados</td></tr>';
+  }
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
