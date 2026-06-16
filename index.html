@@ -464,6 +464,11 @@ label.check input{accent-color:var(--accent)}
       <div class="kpi-header"><div class="kpi-label">Custo por Conversa WA</div><div class="kpi-icon blue">🎯</div></div>
       <div class="kpi-value" id="c-cpl">—</div>
     </div>
+    <div class="kpi-card">
+      <div class="kpi-header"><div class="kpi-label">ROAS do Funil</div><div class="kpi-icon green">📈</div></div>
+      <div class="kpi-value" id="c-roasfunil">—</div>
+      <div class="kpi-sub" id="c-roasfunil-sub"></div>
+    </div>
   </div>
   <div class="table-card">
     <div class="table-toolbar">
@@ -1279,13 +1284,15 @@ async function loadConsultas() {
   const { from, to } = dateRange(state.consultas.days, true);  // inclui hoje
   const showPaused = document.getElementById('consultas-show-paused').checked;
 
-  const [ads, roas, kpis] = await Promise.all([
+  const [ads, roas, kpis, kommoCons] = await Promise.all([
     sb('vw_performance_by_ad',
       `select=ad_id,ad_name,campaign_name,spend,leads,link_clicks,cpc,effective_status,thumbnail_url,image_url&and=(campaign_name.not.ilike.%25INFO%25,campaign_name.not.ilike.%25BIDCAP%25)&date=gte.${from}&date=lte.${to}`),
     sb('vw_roas_unificado',
       `select=ad_id,spend,leads_consulta,consultas_fechadas,receita_consultas&date=gte.${from}&date=lte.${to}`),
     sb('vw_kpis_overview',
-      `select=spend,cliques_wa&categoria=neq.infoproduto&date=gte.${from}&date=lte.${to}`)
+      `select=spend,cliques_wa&categoria=neq.infoproduto&date=gte.${from}&date=lte.${to}`),
+    sb('vw_kommo_by_source',
+      `select=valor_fechado&date=gte.${from}&date=lte.${to}`)
   ]);
 
   const roasByAd = {};
@@ -1315,6 +1322,19 @@ async function loadConsultas() {
   document.getElementById('c-invest').textContent = fmt.brl(totalSpend);
   document.getElementById('c-cliqueswa').textContent = fmt.int(totalCliquesWA) || '—';
   document.getElementById('c-cpl').textContent = totalCliquesWA > 0 ? fmt.brl(cpl) : '—';
+
+  // ROAS do Funil de Consultas = receita de consulta agendada (Kommo valor_fechado) ÷ investimento em consultas
+  const receitaConsFunil = (kommoCons||[]).reduce((s,r)=>s+(+r.valor_fechado||0),0);
+  const roasFunil = totalSpend > 0 ? receitaConsFunil/totalSpend : 0;
+  const elRoasFunil = document.getElementById('c-roasfunil');
+  if (elRoasFunil) {
+    elRoasFunil.textContent = receitaConsFunil > 0 ? fmt.x(roasFunil) : '—';
+    elRoasFunil.className = 'kpi-value roas-' + roasClass(roasFunil);
+    const subRF = document.getElementById('c-roasfunil-sub');
+    if (subRF) subRF.textContent = receitaConsFunil > 0
+      ? fmt.brl(receitaConsFunil) + ' ÷ ' + fmt.brl(totalSpend)
+      : 'sem receita no período';
+  }
 
   // Aviso de UTM se não houver nenhuma atribuição de leads
   const totalLeadsKommo = Object.values(roasByAd).reduce((s,r)=>s+(r.leads||0),0);
